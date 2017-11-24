@@ -31,7 +31,8 @@ class AuthView(View):
             if user is not None:
                 login(request, user)
 
-        user = client.get_user_by_code(code=code)
+        #user = client.get_user_by_code(code=code)
+        user = users.get_fenixedu_user(request)
         person = client.get_person(user=user)
         return HttpResponse(person.__str__())
 
