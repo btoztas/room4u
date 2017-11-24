@@ -1,0 +1,3 @@
+django
+fenixedu
+fenixedu-django
