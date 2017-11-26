@@ -8,11 +8,16 @@ class Room(models.Model):
     modified_date = models.DateTimeField(auto_now=True)
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
+
+
 class Message(models.Model):
     title = models.CharField(max_length=50)
     text = models.CharField(max_length=500)
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    receiver = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
