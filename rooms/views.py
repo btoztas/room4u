@@ -45,6 +45,3 @@ class DashboardView(View):
     def get(self, request, *args, **kwargs):
         current_user = request.user
         return HttpResponse(current_user.username.__str__())
-
-
-
