@@ -1,6 +1,8 @@
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
@@ -12,19 +14,6 @@ config = fenixedu.FenixEduConfiguration\
      'https://fenix.tecnico.ulisboa.pt/')
 
 client = fenixedu.FenixEduClient(config)
-
-
-class IndexView(View):
-    login_template = 'login.html'
-    dashboard_template = 'main.html'
-
-    def get(self, request, *args, **kwargs):
-
-        if not request.user.is_authenticated():
-            context = {'auth_url': client.get_authentication_url()}
-            return render(request, self.login_template, context)
-        else:
-            return render(request, self.dashboard_template)
 
 
 class AuthView(View):
@@ -40,8 +29,23 @@ class AuthView(View):
         return redirect(settings.SITE_URL+'/room4u')
 
 
-class DashboardView(View):
+class IndexView(View):
+    login_template = 'login.html'
+    dashboard_template = 'main.html'
 
     def get(self, request, *args, **kwargs):
-        current_user = request.user
-        return HttpResponse(current_user.username.__str__())
+
+        if not request.user.is_authenticated():
+            context = {'auth_url': client.get_authentication_url()}
+            return render(request, self.login_template, context)
+        else:
+            return render(request, self.dashboard_template)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class CheckInView(View):
+    template = 'check_in.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template)
+
