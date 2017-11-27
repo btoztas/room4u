@@ -1,7 +1,8 @@
 from django.contrib.auth import login, authenticate
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import View
+from django.conf import settings
 import fenixedu
 from fenixedu.authentication import users
 
@@ -14,11 +15,16 @@ client = fenixedu.FenixEduClient(config)
 
 
 class IndexView(View):
-    template_name = 'index.html'
+    login_template = 'login.html'
+    dashboard_template = 'main.html'
 
     def get(self, request, *args, **kwargs):
-        context = {'auth_url': client.get_authentication_url()}
-        return render(request, 'index.html', context)
+
+        if not request.user.is_authenticated():
+            context = {'auth_url': client.get_authentication_url()}
+            return render(request, self.login_template, context)
+        else:
+            return render(request, self.dashboard_template)
 
 
 class AuthView(View):
@@ -31,10 +37,7 @@ class AuthView(View):
             if user is not None:
                 login(request, user)
 
-        #user = client.get_user_by_code(code=code)
-        user = users.get_fenixedu_user(request)
-        person = client.get_person(user=user)
-        return HttpResponse(person.__str__())
+        return redirect(settings.SITE_URL+'/room4u')
 
 
 class DashboardView(View):
@@ -42,3 +45,6 @@ class DashboardView(View):
     def get(self, request, *args, **kwargs):
         current_user = request.user
         return HttpResponse(current_user.username.__str__())
+
+
+
