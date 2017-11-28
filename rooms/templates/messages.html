@@ -1,0 +1,38 @@
+{% extends "blank.html" %}
+
+{% block body %}
+  <a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>
+    <div class="card mb-3">
+        <div class="card-header">
+          <i class="fa fa-table"></i> Registo de Mensagens</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+              <thead>
+                <tr>
+                  <th>From</th>
+                  <th>To</th>
+                  <th>Room</th>
+                  <th>Date</th>
+                  <th>Subject</th>
+                  <th>Text</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for message in messages %}
+                <tr>
+                  <td>{{message.sender}}</td>
+                  <td>{{message.receiver}}</td>
+                  <td>room</td>
+                  <td>{{message.created_date}}</td>
+                  <td>{{message.title}}</td>
+                  <td>{{message.text}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
+  </div>
+{% endblock body %}
