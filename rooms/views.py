@@ -4,7 +4,9 @@ from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
+from .forms import MessageForm
 from fenixedu.authentication import users
+from .models import Message
 
 config = fenixedu.FenixEduConfiguration\
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -45,6 +47,40 @@ class DashboardView(View):
     def get(self, request, *args, **kwargs):
         current_user = request.user
         return HttpResponse(current_user.username.__str__())
+
+class NewMessageView(View):
+    new_message_template = 'new_messages.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.new_message_template)
+
+class NewMessageHandlerView(View):
+    new_message_handler_template = 'new_message_handler.html'
+
+    def post(self, request, *args, **kwargs):
+        #message = request.POST.get("message", "")
+        if request.method == 'POST':
+            # create a form instance and populate it with data from the request:
+            form = MessageForm(request.POST)
+            # check whether it's valid:
+            if form.is_valid():
+                # process the data in form.cleaned_data as required
+                # ...
+                message = request.POST.get("message", "")
+                # redirect to a new URL:
+                instance = Message(title=str(request.POST.get("subject", "")), text=str(request.POST.get("message", "")), sender=request.user, receiver=request.user)
+                instance.save()
+                context = {'message': message}
+                return render(request, self.new_message_handler_template, context)
+
+class MessageView(View):
+    message_template = 'messages.html'
+
+    def get(self, request, *args, **kwargs):
+        messages = Message.objects.all()
+        context = {'messages': messages}
+        #return HttpResponse('ola')
+        return render(request, self.message_template, context)
 
 
 
