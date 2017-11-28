@@ -39,7 +39,10 @@ class IndexView(View):
             context = {'auth_url': client.get_authentication_url()}
             return render(request, self.login_template, context)
         else:
-            return render(request, self.dashboard_template)
+            context = {
+                'username': request.user.username
+            }
+            return render(request, self.dashboard_template, context)
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
@@ -47,5 +50,9 @@ class CheckInView(View):
     template = 'check_in.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template)
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+        return render(request, self.template, context)
 
