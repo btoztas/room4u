@@ -36,6 +36,15 @@ input[type=submit]:hover {
 </style>
 </head>
 {% block body %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/room4u/messages">Messages</a>
+        </li>
+        <li class="breadcrumb-item active">New Message</li>
+    </ol>
  <div class="container">
   <form action="/room4u/messages/handler" method="post">
     {% csrf_token %}

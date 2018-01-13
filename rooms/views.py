@@ -76,7 +76,11 @@ class MessageView(View):
 
     def get(self, request, *args, **kwargs):
         messages = Message.objects.all()
-        context = {'messages': messages}
+        context = {
+            'messages': messages,
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
         #return HttpResponse('ola')
         return render(request, self.message_template, context)
 

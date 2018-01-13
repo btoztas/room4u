@@ -1,7 +1,50 @@
 {% extends "blank.html" %}
 
 {% block body %}
-  <a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item active">Messages</li>
+    </ol><br>
+  <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
+    <a href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a><br><br><br>
+    <form action="/room4u/messages" method="post">
+    {% csrf_token %}
+
+    <!--<label for="keyword">Search Keyword</label><br>-->
+    <input type="text" id="keyword" name="keyword" placeholder="Write keyword...">
+
+    <input type="submit" value="Search" style="width:133px"><br><br>
+
+    </form>
+
+    <form action="/room4u/messages" method="post">
+    {% csrf_token %}
+
+    <!--<label for="room">Filter by Room</label><br>-->
+    <input type="text" id="room" name="room" placeholder="Search in room...">
+
+    <input type="submit" value="Filter by Room"><br><br>
+
+    </form>
+
+    <form action="/room4u/messages" method="post">
+    {% csrf_token %}
+
+    <!--<label for="date">Filter by Date</label><br>-->
+    <select name="date" id ="date" style="width:210px">
+    <option value="year">Last year</option>
+    <option value="6month">Last 6 months</option>
+    <option value="month">Last month</option>
+    <option value="week">Last Week</option>
+    <option value="today">Today</option>
+    <option value="specific_date">Specific Date</option>
+    </select>
+
+    <input type="submit" value="Filter by Date" style="width:135px"><br><br><br>
+
+    </form>
     <div class="card mb-3">
         <div class="card-header">
           <i class="fa fa-table"></i> Registo de Mensagens</div>
