@@ -6,7 +6,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
-from .forms import MessageForm
+from .forms import MessageForm, FilterForm
 from fenixedu.authentication import users
 from .models import Message
 
@@ -79,10 +79,25 @@ class MessageView(View):
         context = {
             'messages': messages,
             'username': request.user.username,
-            'is_admin': request.user.is_staff
+            'is_admin': request.user.is_staff,
+            'filter': "",
+            'text': ""
         }
         #return HttpResponse('ola')
         return render(request, self.message_template, context)
+    def post(self, request, *args, **kwargs):
+        #message = request.POST.get("message", "")
+        if request.method == 'POST':
+            # create a form instance and populate it with data from the request:
+            form = FilterForm(request.POST)
+            # check whether it's valid:
+            if form.is_valid():
+                # process the data in form.cleaned_data as required
+                # ...
+                filter = request.POST.get("filter", "")
+                text = request.POST.get("text", "")
+                context = {'filter': filter, 'text': text}
+                return render(request, self.message_template, context)
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')

@@ -7,33 +7,39 @@
         </li>
         <li class="breadcrumb-item active">Messages</li>
     </ol><br>
+    <p>The filter is {{ filter }} and the text is {{ text }}</p>
   <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
     <a href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a><br><br><br>
-    <form action="/room4u/messages" method="post">
+    <form action={{ request.get_full_path }} method="post">
     {% csrf_token %}
 
+    <input type="hidden" name="filter" value="Search">
+
     <!--<label for="keyword">Search Keyword</label><br>-->
-    <input type="text" id="keyword" name="keyword" placeholder="Write keyword...">
+    <input type="text" id="text" name="text" placeholder="Write keyword...">
 
     <input type="submit" value="Search" style="width:133px"><br><br>
 
     </form>
 
-    <form action="/room4u/messages" method="post">
+    <form action={{ request.get_full_path }} method="post">
     {% csrf_token %}
 
+    <input type="hidden" name="filter" value="Room">
+
     <!--<label for="room">Filter by Room</label><br>-->
-    <input type="text" id="room" name="room" placeholder="Search in room...">
+    <input type="text" id="text" name="text" placeholder="Search in room...">
 
     <input type="submit" value="Filter by Room"><br><br>
 
     </form>
 
-    <form action="/room4u/messages" method="post">
+    <form action={{ request.get_full_path }} method="post">
     {% csrf_token %}
+    <input type="hidden" name="filter" value="Date">
 
     <!--<label for="date">Filter by Date</label><br>-->
-    <select name="date" id ="date" style="width:210px">
+    <select name="text" id ="text" style="width:210px">
     <option value="year">Last year</option>
     <option value="6month">Last 6 months</option>
     <option value="month">Last month</option>
