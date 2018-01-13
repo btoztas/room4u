@@ -1,6 +1,6 @@
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
-from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView
+from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView
 
 urlpatterns = [
 
@@ -16,6 +16,6 @@ urlpatterns = [
     url(r'^logout/$', auth_views.logout, {'next_page': '/room4u'}, name='logout'),
 
     # API urls
-    url(r'^api/$', IndexView.as_view()),
+    url(r'^api/$', ApiView.as_view()),
 ]
 
