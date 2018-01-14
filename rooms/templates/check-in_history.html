@@ -9,4 +9,56 @@
         <li class="breadcrumb-item active">Check-in</li>
         <li class="breadcrumb-item active">History</li>
     </ol>
+
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-calendar-check-o"></i> Current Check-in
+        </div>
+        <div class="card-body">
+            {% if checked_in %}
+                <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
+                    since {{ checked_in_time }}</div>
+                <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
+
+            {% else %}
+                <div style="padding-bottom: inherit">You are not currently checked in.</div>
+            {% endif %}
+            <a href="/room4u/check-in">
+                <button class="btn btn-secondary" type="button">New Check-in</button>
+            </a>
+        </div>
+    </div>
+
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-calendar-check-o"></i> History
+        </div>
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <td width="50%"><b>Room</b></td>
+                            <td><b>Check-in</b></td>
+                            <td>Check-out</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for record in history %}
+                        <tr>
+                            <td>{{ record.room.name }}</td>
+                            <td>{{ record.start }}</td>
+                            <td>{{ record.end }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
 {% endblock %}
