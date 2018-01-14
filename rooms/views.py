@@ -81,7 +81,9 @@ class MessageView(View):
             'username': request.user.username,
             'is_admin': request.user.is_staff,
             'filter': "",
-            'text': ""
+            'text': "",
+            'date': "",
+            'sdate': ""
         }
         #return HttpResponse('ola')
         return render(request, self.message_template, context)
@@ -96,7 +98,27 @@ class MessageView(View):
                 # ...
                 filter = request.POST.get("filter", "")
                 text = request.POST.get("text", "")
-                context = {'filter': filter, 'text': text}
+                date = request.POST.get("date", "")
+                sdate = request.POST.get("sdate", "")
+                if str(filter)=="Search":
+                    messages = Message.objects.filter(text__contains=str(text))
+                    messages = messages | Message.objects.filter(title__contains=str(text))
+                elif str(filter)=="Room":
+                    messages = Message.objects.filter(room__contains=str(text))
+                else:
+                    if str(date) == "year":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "6month":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "month":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "week":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "today":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "specific_date":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                context = {'filter': filter, 'text': text, 'date': date, 'sdate': sdate, 'messages': messages}
                 return render(request, self.message_template, context)
 
 
