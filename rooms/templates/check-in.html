@@ -169,10 +169,13 @@
             </div>
             <div class="card-body">
                 {% if checked_in %}
-                    You are currently checked in on {{ checked_in_room }}, since {{ checked_in_time }}
+                    <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }}, since {{ checked_in_time }}</div>
+                    <button class="btn btn-secondary" type="button"  onclick="check_out()">Check-out</button>
+
                 {% else %}
-                    You are not currently checked in.
+                    <div style="padding-bottom: inherit">You are not currently checked in.</div>
                 {% endif %}
+                <a href="/room4u/check-in/history"><button class="btn btn-secondary" type="button">History</button></a>
             </div>
         </div>
 
@@ -219,17 +222,17 @@
         </div>
 
         <!-- Check-in Modal-->
-        <div class="modal fade" id="checkInModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
+        <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
              aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="checkInModalLabel">Check-in</h5>
+                        <h5 class="modal-title" id="alertModalLabel">Check-in</h5>
                         <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">×</span>
                         </button>
                     </div>
-                    <div class="modal-body"><span id="modal_text"></span></div>
+                    <div class="modal-body"><span id="alertModalText"></span></div>
                     <div class="modal-footer">
                         <button onClick="window.location.reload()" class="btn btn-primary" type="button" data-dismiss="modal">Ok</button>
                     </div>

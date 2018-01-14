@@ -227,6 +227,18 @@ class NewCheckInView(View):
         return HttpResponse(status=200)
 
 
+class CheckOutView(View):
+
+    def post(self, request, *args, **kwargs):
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+        if current_check_in:
+            current_check_in.end = timezone.now()
+            current_check_in.save()
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=404)
+
+
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInHistoryView(View):
     template = 'check-in_history.html'
