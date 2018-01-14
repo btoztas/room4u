@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
-from .forms import MessageForm, SearchRoomFrom
+from .forms import MessageForm, FilterForm, SearchRoomForm
+from fenixedu.authentication import users
 from .models import Message, Room, Visit
 from django.utils import timezone
 
@@ -81,8 +82,49 @@ class MessageView(View):
 
     def get(self, request, *args, **kwargs):
         messages = Message.objects.all()
-        context = {'messages': messages}
+        context = {
+            'messages': messages,
+            'username': request.user.username,
+            'is_admin': request.user.is_staff,
+            'filter': "",
+            'text': "",
+            'date': "",
+            'sdate': ""
+        }
         return render(request, self.message_template, context)
+    def post(self, request, *args, **kwargs):
+        #message = request.POST.get("message", "")
+        if request.method == 'POST':
+            # create a form instance and populate it with data from the request:
+            form = FilterForm(request.POST)
+            # check whether it's valid:
+            if form.is_valid():
+                # process the data in form.cleaned_data as required
+                # ...
+                filter = request.POST.get("filter", "")
+                text = request.POST.get("text", "")
+                date = request.POST.get("date", "")
+                sdate = request.POST.get("sdate", "")
+                if str(filter)=="Search":
+                    messages = Message.objects.filter(text__contains=str(text))
+                    messages = messages | Message.objects.filter(title__contains=str(text))
+                elif str(filter)=="Room":
+                    messages = Message.objects.filter(room__contains=str(text))
+                else:
+                    if str(date) == "year":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "6month":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "month":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "week":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "today":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                    if str(date) == "specific_date":
+                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                context = {'filter': filter, 'text': text, 'date': date, 'sdate': sdate, 'messages': messages}
+                return render(request, self.message_template, context)
 
 
 class ApiView(View):
@@ -120,7 +162,7 @@ class ApiView(View):
 class CheckInView(View):
 
     template = 'check-in.html'
-    form_class = SearchRoomFrom
+    form_class = SearchRoomForm
 
     def get_context(self, request):
 
