@@ -7,7 +7,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
-from .forms import MessageForm
+from .forms import MessageForm, SearchRoomFrom
 from .models import Message, Room
 
 config = fenixedu.FenixEduConfiguration\
@@ -116,7 +116,39 @@ class ApiView(View):
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInView(View):
-    template = 'check_in.html'
+    template = 'check-in.html'
+    form_class = SearchRoomFrom
+
+    def get(self, request, *args, **kwargs):
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+        return render(request, self.template, context)
+
+    def post(self, request, *args, **kwargs):
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+
+            # Get search keywords
+            keyword = request.POST['keyword']
+
+            # Search for rooms in the db
+            context['rooms'] = Room.objects.filter(name__contains=keyword)
+
+        return render(request, self.template, context)
+
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class CheckInHistoryView(View):
+    template = 'check-in_history.html'
 
     def get(self, request, *args, **kwargs):
         context = {
