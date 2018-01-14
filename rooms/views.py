@@ -1,14 +1,17 @@
+import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
-from .forms import MessageForm, FilterForm
+from .forms import MessageForm, FilterForm, SearchRoomForm
 from fenixedu.authentication import users
-from .models import Message
+from .models import Message, Room, Visit
+from django.utils import timezone
 
 config = fenixedu.FenixEduConfiguration\
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -46,11 +49,13 @@ class IndexView(View):
             }
             return render(request, self.dashboard_template, context)
 
+
 class NewMessageView(View):
     new_message_template = 'new_messages.html'
 
     def get(self, request, *args, **kwargs):
         return render(request, self.new_message_template)
+
 
 class NewMessageHandlerView(View):
     new_message_handler_template = 'new_message_handler.html'
@@ -71,6 +76,7 @@ class NewMessageHandlerView(View):
                 context = {'message': message}
                 return render(request, self.new_message_handler_template, context)
 
+
 class MessageView(View):
     message_template = 'messages.html'
 
@@ -85,7 +91,6 @@ class MessageView(View):
             'date': "",
             'sdate': ""
         }
-        #return HttpResponse('ola')
         return render(request, self.message_template, context)
     def post(self, request, *args, **kwargs):
         #message = request.POST.get("message", "")
@@ -122,9 +127,109 @@ class MessageView(View):
                 return render(request, self.message_template, context)
 
 
+class ApiView(View):
+    base_url = 'https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/'
+
+    def retrieve_space(self, space_parent, space_to_explore):
+
+        # Request space's info
+        r = requests.get(self.base_url + space_to_explore)
+        space_info = r.json()
+
+        # Create new space object with the info retrieved
+        new_space = Room(id=space_info['id'], parent_id=space_parent, name=space_info['name'])
+        new_space.save()
+
+        # Explore other contained spaces within this space
+        for contained_space in space_info['containedSpaces']:
+            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=space_info['id'])
+
+    def get(self, request, *args, **kwargs):
+
+        # Request space's info - this will be the campuses (roots of the tree)
+        r = requests.get(self.base_url)
+        campuses = r.json()
+
+        # Explore spaces contained within the campus
+        for campus_index in range(0, len(campuses)):
+            campus_id = campuses[campus_index]['id']
+            self.retrieve_space(space_to_explore=campus_id, space_parent=0)
+
+        return HttpResponse("done")
+
+
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInView(View):
-    template = 'check_in.html'
+
+    template = 'check-in.html'
+    form_class = SearchRoomForm
+
+    def get_context(self, request):
+
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+        if not current_check_in:
+            context['checked_in'] = 0
+        else:
+            context['checked_in'] = 1
+            context['checked_in_room'] = current_check_in.room.name
+            context['checked_in_time'] = current_check_in.start
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context(request)
+
+        return render(request, self.template, context)
+
+    def post(self, request, *args, **kwargs):
+
+        context = self.get_context(request)
+
+        form = self.form_class(request.POST)
+
+        if form.is_valid():
+
+            # Get search keywords
+            keyword = request.POST['keyword']
+
+            # Search for rooms in the db
+            context['rooms'] = Room.objects.filter(name__contains=keyword)
+
+        return render(request, self.template, context)
+
+
+class NewCheckInView(View):
+
+    def post(self, request, *args, **kwargs):
+
+        # Visit parameters
+        user = request.user
+        room = Room.objects.get(id=request.POST['room'])
+        start = timezone.now()
+
+        # Checking if there is a pending visit
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+        if current_check_in:
+            current_check_in.end = start
+            current_check_in.save()
+
+        # Creating visit
+        visit = Visit(user=user, room=room, start=start)
+        visit.save()
+        return HttpResponse(status=200)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class CheckInHistoryView(View):
+    template = 'check-in_history.html'
 
     def get(self, request, *args, **kwargs):
         context = {

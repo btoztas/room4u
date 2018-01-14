@@ -29,16 +29,25 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
+                <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents"
+                   data-parent="#exampleAccordion">
+                    <i class="fa fa-fw fa-calendar"></i>
+                    <span class="nav-link-text">Check-ins</span>
+                </a>
+                <ul class="sidenav-second-level collapse" id="collapseComponents">
+                    <li>
+                        <a href="/room4u/check-in/">New Check-in</a>
+                    </li>
+                    <li>
+                        <a href="/room4u/check-in/history">Check-in History</a>
+                    </li>
+                </ul>
+            </li>
             <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Messages">
                 <a class="nav-link" href="/room4u/messages">
                     <i class="fa fa-fw fa-envelope"></i>
                     <span class="nav-link-text">Messages</span>
-                </a>
-            </li>
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
-                <a class="nav-link" href="/room4u/check-in">
-                    <i class="fa fa-fw fa-calendar"></i>
-                    <span class="nav-link-text">Check-ins</span>
                 </a>
             </li>
         </ul>
@@ -86,6 +95,7 @@
     <script src="{% static 'bootstrap/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <!-- Custom scripts for all pages-->
     <script src="{% static 'bootstrap/js/sb-admin.min.js' %}"></script>
+    <script src="{% static 'js/functions.js' %}"></script>
 </div>
 </body>
 

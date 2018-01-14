@@ -1,5 +1,6 @@
 from django import forms
 
+
 class MessageForm(forms.Form):
     rname = forms.CharField(label='rname', max_length=100)
     subject = forms.CharField(label='subject', max_length=100)
@@ -10,3 +11,6 @@ class FilterForm(forms.Form):
     text = forms.CharField(label='text', max_length=100)
     date = forms.CharField(label='date', max_length=100)
     sdate = forms.CharField(label='sdate', max_length=100)
+
+class SearchRoomForm(forms.Form):
+    keyword = forms.CharField(label='rname', max_length=100)
