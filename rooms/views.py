@@ -243,10 +243,28 @@ class CheckOutView(View):
 class CheckInHistoryView(View):
     template = 'check-in_history.html'
 
-    def get(self, request, *args, **kwargs):
+    def get_context(self, request):
+
         context = {
             'username': request.user.username,
             'is_admin': request.user.is_staff
         }
+
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+        if not current_check_in:
+            context['checked_in'] = 0
+        else:
+            context['checked_in'] = 1
+            context['checked_in_room'] = current_check_in.room.name
+            context['checked_in_time'] = current_check_in.start
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(request)
+
+        context['history'] = Visit.objects.filter(user=request.user).exclude(end__isnull=True).all()
+
         return render(request, self.template, context)
 

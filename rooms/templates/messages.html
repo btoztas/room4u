@@ -8,98 +8,100 @@
         <li class="breadcrumb-item active">Messages</li>
     </ol><br>
     <p>The filter is {{ filter }} and the text is {{ text }} and date is {{ date }} and sdate is {{ sdate }}</p>
-  <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
-    <a href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a><br><br><br>
+    <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
+    <a href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a>
+    <br><br><br>
     <form action={{ request.get_full_path }} method="post">
-    {% csrf_token %}
+        {% csrf_token %}
 
-    <input type="hidden" name="filter" value="Search">
-    <input type="hidden" name="date" value="date">
-    <input type="hidden" name="sdate" value="sdate">
+        <input type="hidden" name="filter" value="Search">
+        <input type="hidden" name="date" value="date">
+        <input type="hidden" name="sdate" value="sdate">
 
-    <!--<label for="keyword">Search Keyword</label><br>-->
-    <input type="text" id="text" name="text" placeholder="Write keyword...">
+        <!--<label for="keyword">Search Keyword</label><br>-->
+        <input type="text" id="text" name="text" placeholder="Write keyword...">
 
-    <input type="submit" value="Search" style="width:133px"><br><br>
+        <input type="submit" value="Search" style="width:133px"><br><br>
 
     </form>
 
     <form action={{ request.get_full_path }} method="post">
-    {% csrf_token %}
+        {% csrf_token %}
 
-    <input type="hidden" name="filter" value="Room">
+        <input type="hidden" name="filter" value="Room">
 
-    <!--<label for="room">Filter by Room</label><br>-->
-    <input type="hidden" name="date" value="date">
-    <input type="hidden" name="sdate" value="sdate">
-    <input type="text" id="text" name="text" placeholder="Search in room...">
+        <!--<label for="room">Filter by Room</label><br>-->
+        <input type="hidden" name="date" value="date">
+        <input type="hidden" name="sdate" value="sdate">
+        <input type="text" id="text" name="text" placeholder="Search in room...">
 
-    <input type="submit" value="Filter by Room"><br><br>
+        <input type="submit" value="Filter by Room"><br><br>
 
     </form>
 
     <form action={{ request.get_full_path }} method="post">
-    {% csrf_token %}
-    <input type="hidden" name="filter" value="Date">
+        {% csrf_token %}
+        <input type="hidden" name="filter" value="Date">
 
-    <input type="hidden" name="text" value="text">
+        <input type="hidden" name="text" value="text">
 
-    <!--<label for="date">Filter by Date</label><br>-->
-    <select name="date" id ="date" style="width:210px" onchange="specificDate()">
-    <option value="year">Last year</option>
-    <option value="6month">Last 6 months</option>
-    <option value="month">Last month</option>
-    <option value="week">Last Week</option>
-    <option value="today">Today</option>
-    <option value="specific_date">Specific Date</option>
-    </select>
+        <!--<label for="date">Filter by Date</label><br>-->
+        <select name="date" id="date" style="width:210px" onchange="specificDate()">
+            <option value="year">Last year</option>
+            <option value="6month">Last 6 months</option>
+            <option value="month">Last month</option>
+            <option value="week">Last Week</option>
+            <option value="today">Today</option>
+            <option value="specific_date">Specific Date</option>
+        </select>
 
-    <input type="hidden" id="sdate" name="sdate" placeholder="Search specific date...">
+        <input type="hidden" id="sdate" name="sdate" placeholder="Search specific date...">
 
-    <input type="submit" value="Filter by Date" style="width:135px"><br><br><br>
+        <input type="submit" value="Filter by Date" style="width:135px"><br><br><br>
 
     </form>
     <div class="card mb-3">
         <div class="card-header">
-          <i class="fa fa-table"></i> Registo de Mensagens</div>
+            <i class="fa fa-table"></i> Registo de Mensagens
+        </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-              <thead>
-                <tr>
-                  <th>From</th>
-                  <th>To</th>
-                  <th>Room</th>
-                  <th>Date</th>
-                  <th>Subject</th>
-                  <th>Text</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for message in messages %}
-                <tr>
-                  <td>{{message.sender}}</td>
-                  <td>{{message.receiver}}</td>
-                  <td>room</td>
-                  <td>{{message.created_date}}</td>
-                  <td>{{message.title}}</td>
-                  <td>{{message.text}}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-      </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Room</th>
+                        <th>Date</th>
+                        <th>Subject</th>
+                        <th>Text</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for message in messages %}
+                        <tr>
+                            <td>{{ message.sender }}</td>
+                            <td>{{ message.receiver }}</td>
+                            <td>room</td>
+                            <td>{{ message.created_date }}</td>
+                            <td>{{ message.title }}</td>
+                            <td>{{ message.text }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
     </div>
-    <div class="card-footer small text-muted">Updated yesterday at 11:59 PM</div>
-  </div>
-  <script>
-    function specificDate() {
-      var text = document.getElementById("date").value;
-      if (text.toString() == "specific_date") {
-        document.getElementById("sdate").type="text";
-      }else{
-          document.getElementById("sdate").value="text";
-      }
-    }
-  </script>
+    <script>
+        function specificDate() {
+            var text = document.getElementById("date").value;
+            if (text.toString() == "specific_date") {
+                document.getElementById("sdate").type = "text";
+            } else {
+                document.getElementById("sdate").value = "text";
+            }
+        }
+    </script>
 {% endblock body %}
