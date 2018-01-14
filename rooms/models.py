@@ -41,8 +41,8 @@ class Message(models.Model):
 class Visit(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    start = models.DateTimeField(auto_now_add=True)
-    end = models.DateTimeField()
+    start = models.DateTimeField()
+    end = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(editable=False)
     modified_at = models.DateTimeField()
 

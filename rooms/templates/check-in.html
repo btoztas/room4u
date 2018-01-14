@@ -6,7 +6,8 @@
         <li class="breadcrumb-item">
             <a href="/room4u">room4u</a>
         </li>
-        <li class="breadcrumb-item active">Check-ins</li>
+        <li class="breadcrumb-item active">Check-in</li>
+        <li class="breadcrumb-item active">New</li>
     </ol>
 
     {% if is_admin %}
@@ -164,6 +165,20 @@
     {% else %}
         <div class="card mb-3">
             <div class="card-header">
+                <i class="fa fa-calendar-check-o"></i> Current Check-in
+            </div>
+            <div class="card-body">
+                {% if checked_in %}
+                    You are currently checked in on {{ checked_in_room }}, since {{ checked_in_time }}
+                {% else %}
+                    You are not currently checked in.
+                {% endif %}
+            </div>
+        </div>
+
+
+        <div class="card mb-3">
+            <div class="card-header">
                 <i class="fa fa-calendar-plus-o"></i> New Check-in
             </div>
             <div class="card-body">
@@ -185,9 +200,15 @@
                             <tbody>
                             {% for room in rooms %}
                                 <tr>
-                                    <td>{{ room.name }}</td>
-                                    <td>View</td>
-                                    <td>Check-in</td>
+                                    <td width="80%">{{ room.name }}</td>
+                                    <td width="10%">
+                                        <button class="btn btn-secondary btn-block" type="submit">View</button>
+                                    </td>
+                                    <td width="10%">
+                                        <button class="btn btn-secondary btn-block" type="submit"
+                                                onclick="check_in('{{ room.id }}', '{{ room.name }}')">Check-in
+                                        </button>
+                                    </td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -195,6 +216,25 @@
                     </div>
                 </div>
             {% endif %}
+        </div>
+
+        <!-- Check-in Modal-->
+        <div class="modal fade" id="checkInModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="checkInModalLabel">Check-in</h5>
+                        <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"><span id="modal_text"></span></div>
+                    <div class="modal-footer">
+                        <button onClick="window.location.reload()" class="btn btn-primary" type="button" data-dismiss="modal">Ok</button>
+                    </div>
+                </div>
+            </div>
         </div>
     {% endif %}
 {% endblock %}
