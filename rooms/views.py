@@ -4,11 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
 from .forms import MessageForm, SearchRoomFrom
-from .models import Message, Room
+from .models import Message, Room, Visit
+from django.utils import timezone
 
 config = fenixedu.FenixEduConfiguration\
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -116,21 +118,37 @@ class ApiView(View):
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInView(View):
+
     template = 'check-in.html'
     form_class = SearchRoomFrom
 
-    def get(self, request, *args, **kwargs):
+    def get_context(self, request):
+
         context = {
             'username': request.user.username,
             'is_admin': request.user.is_staff
         }
+
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+        if not current_check_in:
+            context['checked_in'] = 0
+        else:
+            context['checked_in'] = 1
+            context['checked_in_room'] = current_check_in.room.name
+            context['checked_in_time'] = current_check_in.start
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context(request)
+
         return render(request, self.template, context)
 
     def post(self, request, *args, **kwargs):
-        context = {
-            'username': request.user.username,
-            'is_admin': request.user.is_staff
-        }
+
+        context = self.get_context(request)
 
         form = self.form_class(request.POST)
 
@@ -144,6 +162,27 @@ class CheckInView(View):
 
         return render(request, self.template, context)
 
+
+class NewCheckInView(View):
+
+    def post(self, request, *args, **kwargs):
+
+        # Visit parameters
+        user = request.user
+        room = Room.objects.get(id=request.POST['room'])
+        start = timezone.now()
+
+        # Checking if there is a pending visit
+        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+        if current_check_in:
+            current_check_in.end = start
+            current_check_in.save()
+
+        # Creating visit
+        visit = Visit(user=user, room=room, start=start)
+        visit.save()
+        return HttpResponse(status=200)
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
