@@ -1,181 +1,121 @@
 {% extends "blank.html" %}
 
 {% block body %}
-    <!-- Breadcrumbs-->
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a href="/room4u">room4u</a>
-        </li>
-        <li class="breadcrumb-item active">Check-in</li>
-        <li class="breadcrumb-item active">New</li>
-    </ol>
+
 
     {% if is_admin %}
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/room4u">room4u</a>
+            </li>
+            <li class="breadcrumb-item active">Check-in</li>
+        </ol>
+        <table>
+            <tr>
+                <td width="70%">
+                    <h4>
+                        {% if total == 0 %}
+                            There are no users checked-in
+                        {% elif total == 1 %}
+                            Total: 1 checked-in
+                        {% else %}
+                            Total: {{ total }} check-ins
+                        {% endif %}
+                    </h4>
+                </td>
+                <td>
+                    <form class="form-inline my-2 my-lg-0 mr-lg-2">
+                        <div class="input-group">
 
-        <h1> Current Check-ins</h1>
+                            <input type="radio" name="search_type" id="search_type1" value="Room" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type1" style="margin-right: 10px">Room</label>
+                            <input type="radio" name="search_type" id="search_type2" value="Username" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type2" style="margin-right: 10px">Username</label>
+                            <input type="radio" name="search_type" id="search_type3" value="Name" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type3" style="margin-right: 10px">Name</label>
+
+                            <input class="form-control" type="text" placeholder="Search" style="width: 200px">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="button">
+                                  <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
         <hr>
-        <div class="card mb-3">
-            <div class="card-header">
-                <i class="fa fa-map-pin"></i> GA1
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Age</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
-                            <th>Remove</th>
-                        </tr>
-                        </thead>
+        {% for room in rooms %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <table>
                         <tbody>
-                        <tr>
-                            <td>Gavin Cortez</td>
-                            <td>Team Leader</td>
-                            <td>San Francisco</td>
-                            <td>22</td>
-                            <td>2008/10/26</td>
-                            <td>$235,500</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Martena Mccray</td>
-                            <td>Post-Sales support</td>
-                            <td>Edinburgh</td>
-                            <td>46</td>
-                            <td>2011/03/09</td>
-                            <td>$324,050</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Unity Butler</td>
-                            <td>Marketing Designer</td>
-                            <td>San Francisco</td>
-                            <td>47</td>
-                            <td>2009/12/09</td>
-                            <td>$85,675</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Timothy Mooney</td>
-                            <td>Office Manager</td>
-                            <td>London</td>
-                            <td>37</td>
-                            <td>2008/12/11</td>
-                            <td>$136,200</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Jackson Bradshaw</td>
-                            <td>Director</td>
-                            <td>New York</td>
-                            <td>65</td>
-                            <td>2008/09/26</td>
-                            <td>$645,750</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Zenaida Frank</td>
-                            <td>Software Engineer</td>
-                            <td>New York</td>
-                            <td>63</td>
-                            <td>2010/01/04</td>
-                            <td>$125,250</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Zorita Serrano</td>
-                            <td>Software Engineer</td>
-                            <td>San Francisco</td>
-                            <td>56</td>
-                            <td>2012/06/01</td>
-                            <td>$115,000</td>
-                            <td><i class="fa fa-times"></i></td>
+                        <tr width="100%">
+                            <td width="99%">
+                                <i class="fa fa-map-pin"></i>
+                                <b>{{ room.name }}</b> - {{ room.total }} Check-in{% if room.total > 1 %}s{% endif %}
+                            </td>
+                            <td width="10%">
+                                <a data-toggle="collapse" href="#{{ room.room }}">
+                                    <button class="btn btn-secondary" type="button">Expand</button>
+                                </a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-        <div class="card mb-3">
-            <div class="card-header">
-                <i class="fa fa-map-pin"></i> GA2
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Position</th>
-                            <th>Office</th>
-                            <th>Age</th>
-                            <th>Start date</th>
-                            <th>Salary</th>
-                            <th>Remove</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>Shou Itou</td>
-                            <td>Regional Marketing</td>
-                            <td>Tokyo</td>
-                            <td>20</td>
-                            <td>2011/08/14</td>
-                            <td>$163,000</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Michelle House</td>
-                            <td>Integration Specialist</td>
-                            <td>Sidney</td>
-                            <td>37</td>
-                            <td>2011/06/02</td>
-                            <td>$95,400</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Timothy Mooney</td>
-                            <td>Office Manager</td>
-                            <td>London</td>
-                            <td>37</td>
-                            <td>2008/12/11</td>
-                            <td>$136,200</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        <tr>
-                            <td>Finn Camacho</td>
-                            <td>Support Engineer</td>
-                            <td>San Francisco</td>
-                            <td>47</td>
-                            <td>2009/07/07</td>
-                            <td>$87,500</td>
-                            <td><i class="fa fa-times"></i></td>
-                        </tr>
-                        </tbody>
-                    </table>
+                <div class="card-body ">
+                    <div class="table-responsive panel-collapse collapse" id="{{ room.room }}">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for user in room.users %}
+                                <tr>
+                                    <td>{{ user.user.username }}</td>
+                                    <td>{{ user.start }}</td>
+                                    <td>Remove</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endfor %}
+
 
     {% else %}
+
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/room4u">room4u</a>
+            </li>
+            <li class="breadcrumb-item active">Check-in</li>
+            <li class="breadcrumb-item active">New</li>
+        </ol>
+
         <div class="card mb-3">
             <div class="card-header">
                 <i class="fa fa-calendar-check-o"></i> Current Check-in
             </div>
             <div class="card-body">
                 {% if checked_in %}
-                    <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }}, since {{ checked_in_time }}</div>
-                    <button class="btn btn-secondary" type="button"  onclick="check_out()">Check-out</button>
+                    <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
+                        since {{ checked_in_time }}</div>
+                    <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
 
                 {% else %}
                     <div style="padding-bottom: inherit">You are not currently checked in.</div>
                 {% endif %}
-                <a href="/room4u/check-in/history"><button class="btn btn-secondary" type="button">History</button></a>
+                <a href="/room4u/check-in/history">
+                    <button class="btn btn-secondary" type="button">History</button>
+                </a>
             </div>
         </div>
 
