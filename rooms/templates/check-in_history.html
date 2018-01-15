@@ -10,55 +10,137 @@
         <li class="breadcrumb-item active">History</li>
     </ol>
 
+    {% if is_admin %}
+        <table>
+            <tr>
+                <td width="70%">
+                    <h4>
+                        {% if toral == 0 %}
+                            There are no users checked-in
+                        {% elif total == 1 %}
+                            Total: 1 checked-in
+                        {% else %}
+                            Total: {{ total }} check-ins
+                        {% endif %}
+                    </h4>
+                </td>
+                <td>
+                    <form class="form-inline my-2 my-lg-0 mr-lg-2">
+                        <div class="input-group">
 
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="fa fa-calendar-check-o"></i> Current Check-in
-        </div>
-        <div class="card-body">
-            {% if checked_in %}
-                <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
-                    since {{ checked_in_time }}</div>
-                <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
+                            <input type="radio" name="search_type" id="search_type1" value="Room" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type1" style="margin-right: 10px">Room</label>
+                            <input type="radio" name="search_type" id="search_type2" value="Username" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type2" style="margin-right: 10px">Username</label>
+                            <input type="radio" name="search_type" id="search_type3" value="Name" style=" margin-top: 10px;
+  vertical-align: middle; margin-right: 5px"> <label
+                                for="search_type3" style="margin-right: 10px">Name</label>
 
-            {% else %}
-                <div style="padding-bottom: inherit">You are not currently checked in.</div>
-            {% endif %}
-            <a href="/room4u/check-in">
-                <button class="btn btn-secondary" type="button">New Check-in</button>
-            </a>
-        </div>
-    </div>
+                            <input class="form-control" type="text" placeholder="Search" style="width: 200px">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="button">
+                                  <i class="fa fa-search"></i>
+                                </button>
+                            </span>
 
-
-    <div class="card mb-3">
-        <div class="card-header">
-            <i class="fa fa-calendar-check-o"></i> History
-        </div>
-        <div class="card-body">
-
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <td width="50%"><b>Room</b></td>
-                            <td><b>Check-in</b></td>
-                            <td>Check-out</td>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        <hr>
+        {% for room in rooms %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <table>
+                        <tbody>
+                        <tr width="100%">
+                            <td width="99%">
+                                <i class="fa fa-map-pin"></i>
+                                <b>{{ room.name }}</b> - {{ room.total }} Check-in{% if room.total > 1 %}s{% endif %}
+                            </td>
+                            <td width="10%">
+                                <a data-toggle="collapse" href="#{{ room.room }}">
+                                    <button class="btn btn-secondary" type="button">Expand</button>
+                                </a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                    {% for record in history %}
-                        <tr>
-                            <td>{{ record.room.name }}</td>
-                            <td>{{ record.start }}</td>
-                            <td>{{ record.end }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-body ">
+                    <div class="table-responsive panel-collapse collapse" id="{{ room.room }}">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for user in room.users %}
+                                <tr>
+                                    <td>{{ user.user.username }}</td>
+                                    <td>{{ user.start }}</td>
+                                    <td>{{ user.end }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+    {% else %}
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-calendar-check-o"></i> Current Check-in
+            </div>
+            <div class="card-body">
+                {% if checked_in %}
+                    <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
+                        since {{ checked_in_time }}</div>
+                    <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
+
+                {% else %}
+                    <div style="padding-bottom: inherit">You are not currently checked in.</div>
+                {% endif %}
+                <a href="/room4u/check-in">
+                    <button class="btn btn-secondary" type="button">New Check-in</button>
+                </a>
             </div>
         </div>
-    </div>
 
 
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-calendar-check-o"></i> History
+            </div>
+            <div class="card-body">
+                {% if history %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <thead>
+                            <tr>
+                                <th width="50%">Room</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for record in history %}
+                                <tr>
+                                    <td>{{ record.room.name }}</td>
+                                    <td>{{ record.start }}</td>
+                                    <td>{{ record.end }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    </div>
+                {% else %}
+                    There are no check-in records
+                {% endif %}
+        </div>
+
+    {% endif %}
 {% endblock %}

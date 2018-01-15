@@ -25,7 +25,6 @@ function check_in(room_id, room_name) {
     };
 
     http.send(params);
-
 }
 
 function check_out() {

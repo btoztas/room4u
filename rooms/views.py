@@ -1,10 +1,10 @@
 import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
@@ -15,7 +15,7 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.http import JsonResponse
 
-config = fenixedu.FenixEduConfiguration\
+config = fenixedu.FenixEduConfiguration \
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
      'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
      'https://fenix.tecnico.ulisboa.pt/')
@@ -24,7 +24,6 @@ client = fenixedu.FenixEduClient(config)
 
 
 class AuthView(View):
-
     def get(self, request, *args, **kwargs):
 
         code = request.GET.get('code', None)
@@ -33,7 +32,7 @@ class AuthView(View):
             if user is not None:
                 login(request, user)
 
-        return redirect(settings.SITE_URL+'/room4u')
+        return redirect(settings.SITE_URL + '/room4u/')
 
 
 class IndexView(View):
@@ -47,7 +46,8 @@ class IndexView(View):
             return render(request, self.login_template, context)
         else:
             context = {
-                'username': request.user.username
+                'username': request.user.username,
+                'is_admin': request.user.is_staff
             }
             return render(request, self.dashboard_template, context)
 
@@ -82,7 +82,6 @@ class NewMessageHandlerView(View):
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        #message = request.POST.get("message", "")
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = MessageForm(request.POST)
@@ -92,7 +91,9 @@ class NewMessageHandlerView(View):
                 # ...
                 message = request.POST.get("message", "")
                 # redirect to a new URL:
-                instance = Message(title=str(request.POST.get("subject", "")), text=str(request.POST.get("message", "")), sender=request.user, receiver=request.user)
+                instance = Message(title=str(request.POST.get("subject", "")),
+                                   text=str(request.POST.get("message", "")), sender=request.user,
+                                   receiver=request.user)
                 instance.save()
                 instance2 = NewMessage(message=instance)
                 instance2.save()
@@ -119,10 +120,10 @@ class MessageView(View):
             'sdate': ""
         }
         return render(request, self.message_template, context)
+
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        #message = request.POST.get("message", "")
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = FilterForm(request.POST)
@@ -134,10 +135,10 @@ class MessageView(View):
                 text = request.POST.get("text", "")
                 date = request.POST.get("date", "")
                 sdate = request.POST.get("sdate", "")
-                if str(filter)=="Search":
+                if str(filter) == "Search":
                     messages = Message.objects.filter(text__contains=str(text))
                     messages = messages | Message.objects.filter(title__contains=str(text))
-                elif str(filter)=="Room":
+                elif str(filter) == "Room":
                     messages = Message.objects.filter(room__contains=str(text))
                 else:
                     if str(date) == "year":
@@ -197,7 +198,6 @@ class ApiView(View):
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInView(View):
-
     template = 'check-in.html'
     form_class = SearchRoomForm
 
@@ -208,20 +208,30 @@ class CheckInView(View):
             'is_admin': request.user.is_staff
         }
 
-        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+        if not request.user.is_staff:
+            current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
 
-        if not current_check_in:
-            context['checked_in'] = 0
-        else:
-            context['checked_in'] = 1
-            context['checked_in_room'] = current_check_in.room.name
-            context['checked_in_time'] = current_check_in.start
+            if not current_check_in:
+                context['checked_in'] = 0
+            else:
+                context['checked_in'] = 1
+                context['checked_in_room'] = current_check_in.room.name
+                context['checked_in_time'] = current_check_in.start
 
         return context
 
     def get(self, request, *args, **kwargs):
 
         context = self.get_context(request)
+
+        if request.user.is_staff:
+            context['rooms'] = Visit.objects.filter(end__isnull=True).values('room').annotate(total=Count('room_id')).\
+                order_by('-total')
+            context['total'] = 0
+            for room in context['rooms']:
+                room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).all()
+                room['name'] = room['users'][0].room.name
+                context['total'] += room['total']
 
         return render(request, self.template, context)
 
@@ -232,7 +242,6 @@ class CheckInView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-
             # Get search keywords
             keyword = request.POST['keyword']
 
@@ -242,10 +251,9 @@ class CheckInView(View):
         return render(request, self.template, context)
 
 
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class NewCheckInView(View):
-
     def post(self, request, *args, **kwargs):
-
         # Visit parameters
         user = request.user
         room = Room.objects.get(id=request.POST['room'])
@@ -264,8 +272,8 @@ class NewCheckInView(View):
         return HttpResponse(status=200)
 
 
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckOutView(View):
-
     def post(self, request, *args, **kwargs):
         current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
         if current_check_in:
@@ -287,21 +295,33 @@ class CheckInHistoryView(View):
             'is_admin': request.user.is_staff
         }
 
-        current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+        if not request.user.is_staff:
 
-        if not current_check_in:
-            context['checked_in'] = 0
-        else:
-            context['checked_in'] = 1
-            context['checked_in_room'] = current_check_in.room.name
-            context['checked_in_time'] = current_check_in.start
+            current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+            if not current_check_in:
+                context['checked_in'] = 0
+            else:
+                context['checked_in'] = 1
+                context['checked_in_room'] = current_check_in.room.name
+                context['checked_in_time'] = current_check_in.start
 
         return context
 
     def get(self, request, *args, **kwargs):
         context = self.get_context(request)
 
-        context['history'] = Visit.objects.filter(user=request.user).exclude(end__isnull=True).all()
+        if request.user.is_staff:
+
+            context['rooms'] = Visit.objects.values('room').annotate(total=Count('room_id')). \
+                order_by('-total')
+            context['total'] = 0
+            for room in context['rooms']:
+                room['users'] = Visit.objects.filter(room=room['room']).all()
+                room['name'] = room['users'][0].room.name
+                context['total'] += room['total']
+
+        else:
+            context['history'] = Visit.objects.filter(user=request.user).exclude(end__isnull=True).all()
 
         return render(request, self.template, context)
-

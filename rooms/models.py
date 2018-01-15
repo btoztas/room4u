@@ -54,6 +54,3 @@ class Visit(models.Model):
 
 class NewMessage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='message')
-
-
-
