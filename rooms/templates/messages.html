@@ -9,7 +9,19 @@
     </ol><br>
     <p>The filter is {{ filter }} and the text is {{ text }} and date is {{ date }} and sdate is {{ sdate }}</p>
     <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
-    <a href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a>
+
+
+    <a id = "new" href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a>
+
+    <script>
+        if ("{{ username }}"!="administrator") {
+            document.getElementById('new').style.visibility = "hidden";
+            //document.getElementById('new').outerHTML="";
+        }else{
+            document.getElementById('new').style.visibility = "visible";
+        }
+    </script>
+
     <br><br><br>
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
@@ -83,7 +95,7 @@
                             <td>{{ message.sender }}</td>
                             <td>{{ message.receiver }}</td>
                             <td>room</td>
-                            <td>{{ message.created_date }}</td>
+                            <td>{{ message.created_at }}</td>
                             <td>{{ message.title }}</td>
                             <td>{{ message.text }}</td>
                         </tr>

@@ -46,7 +46,7 @@ input[type=submit]:hover {
         <li class="breadcrumb-item active">New Message</li>
     </ol>
  <div class="container">
-  <form action="/room4u/messages/handler" method="post">
+  <form id = "newmessage" action="/room4u/messages/handler" method="post">
     {% csrf_token %}
 
     <label for="rname">Room</label><br>
