@@ -51,9 +51,3 @@ class Visit(models.Model):
             self.created_at = timezone.now()
         self.modified_at = timezone.now()
         return super(Visit, self).save(*args, **kwargs)
-
-
-
-
-
-
