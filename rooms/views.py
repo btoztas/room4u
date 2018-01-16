@@ -393,7 +393,8 @@ class CheckInHistoryView(View):
                     for user in context['users']:
                         user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
                         user['username'] = user['visits'][0].user.username
-                        context['total'] += user['total']
+
+                    context['total'] = len(context['users'])
 
 
                 #elif type == 'name':
@@ -403,3 +404,24 @@ class CheckInHistoryView(View):
                 context['search_type'] = search_type
 
             return render(request, self.template, context)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class UsersView(View):
+
+    template = 'users.html'
+
+    def get_context(self, request):
+
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context(request)
+
+        return render(request, self.template, context)
