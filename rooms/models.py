@@ -17,11 +17,6 @@ class Room(models.Model):
         return super(Room, self).save(*args, **kwargs)
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    assigned_room = models.ForeignKey(Room, on_delete=models.CASCADE)
-
-
 class Message(models.Model):
     title = models.CharField(max_length=50)
     text = models.CharField(max_length=500)
