@@ -16,6 +16,7 @@
     <link href="{% static 'bootstrap/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="{% static 'bootstrap/css/sb-admin.css' %}" rel="stylesheet">
+    <script src="{% static 'js/functions.js' %}"></script>
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
@@ -45,12 +46,6 @@
                         </li>
                     </ul>
                 </li>
-                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Rooms">
-                    <a class="nav-link" href="/room4u/rooms">
-                        <i class="fa fa-fw fa-map-marker"></i>
-                        <span class="nav-link-text">Manage Rooms</span>
-                    </a>
-                </li>
             {% else %}
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
                     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents"
@@ -74,6 +69,14 @@
                     <span class="nav-link-text">Messages</span>
                 </a>
             </li>
+            {% if is_admin %}
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Rooms">
+                    <a class="nav-link" href="/room4u/rooms">
+                        <i class="fa fa-fw fa-map-marker"></i>
+                        <span class="nav-link-text">Manage Rooms</span>
+                    </a>
+                </li>
+            {% endif %}
         </ul>
         <ul class="navbar-nav sidenav-toggler">
             <li class="nav-item">
@@ -139,7 +142,8 @@
     <script src="{% static 'bootstrap/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <!-- Custom scripts for all pages-->
     <script src="{% static 'bootstrap/js/sb-admin.min.js' %}"></script>
-    <script src="{% static 'js/functions.js' %}"></script>
+    {% block scripts %}
+    {% endblock %}
 </div>
 </body>
 

@@ -37,16 +37,35 @@ class IndexView(View):
     login_template = 'login.html'
     dashboard_template = 'main.html'
 
+    def get_context(self, request):
+
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        if not request.user.is_staff:
+
+            current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
+
+            if not current_check_in:
+                context['checked_in'] = 0
+            else:
+                context['checked_in'] = 1
+                context['checked_in_room'] = current_check_in.room.name
+                context['checked_in_time'] = current_check_in.start
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
+
+        return context
+
     def get(self, request, *args, **kwargs):
 
         if not request.user.is_authenticated():
             context = {'auth_url': client.get_authentication_url()}
             return render(request, self.login_template, context)
         else:
-            context = {
-                'username': request.user.username,
-                'is_admin': request.user.is_staff
-            }
+            context = self.get_context(request)
+
             return render(request, self.dashboard_template, context)
 
 
@@ -206,6 +225,7 @@ class CheckInView(View):
         }
 
         if not request.user.is_staff:
+
             current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
 
             if not current_check_in:
@@ -214,6 +234,7 @@ class CheckInView(View):
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
                 context['checked_in_time'] = current_check_in.start
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
 
         return context
 
@@ -336,6 +357,7 @@ class CheckInHistoryView(View):
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
                 context['checked_in_time'] = current_check_in.start
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
 
         return context
 
@@ -462,4 +484,3 @@ class RoomView(View):
         context['current_total'] = len(context['current_visits'])
 
         return render(request, self.template, context)
-
