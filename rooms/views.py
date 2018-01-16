@@ -8,12 +8,11 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
-from .forms import MessageForm, FilterForm, SearchRoomForm
-from fenixedu.authentication import users
+from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
 from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
-from django.http import JsonResponse
+
 
 config = fenixedu.FenixEduConfiguration \
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -199,7 +198,6 @@ class ApiView(View):
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
 class CheckInView(View):
     template = 'check-in.html'
-    form_class = SearchRoomForm
 
     def get_context(self, request):
 
@@ -239,14 +237,48 @@ class CheckInView(View):
 
         context = self.get_context(request)
 
-        form = self.form_class(request.POST)
+        if request.user.is_staff:
 
-        if form.is_valid():
-            # Get search keywords
-            keyword = request.POST['keyword']
+            form = AdminSearchForm(request.POST)
 
-            # Search for rooms in the db
-            context['rooms'] = Room.objects.filter(name__contains=keyword)
+            if form.is_valid():
+                # Get search keywords
+                search_keyword = request.POST['search_keyword']
+                search_type = request.POST['search_type']
+
+                context['total'] = 0
+
+                if search_type == 'room':
+
+                    context['rooms'] = Visit.objects.filter(room__name__contains=search_keyword, end__isnull=True)\
+                        .values('room').annotate(total=Count('room_id')).order_by('-total')
+
+                    for room in context['rooms']:
+                        room['users'] = Visit.objects\
+                            .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).all()
+                        room['name'] = room['users'][0].room.name
+
+                        context['total'] += room['total']
+
+                elif search_type == 'username':
+                    context['users'] = Visit.objects.filter(end__isnull=True, user__username__contains=search_keyword)\
+                        .all()
+                    context['total'] = len(context['users'])
+
+                #elif type == 'name':
+                    #TODO: implement name
+
+                context['search_keyword'] = search_keyword
+                context['search_type'] = search_type
+
+        else:
+            form = SearchRoomForm(request.POST)
+            if form.is_valid():
+                # Get search keywords
+                keyword = request.POST['keyword']
+
+                # Search for rooms in the db
+                context['rooms'] = Room.objects.filter(name__contains=keyword)
 
         return render(request, self.template, context)
 
@@ -325,3 +357,49 @@ class CheckInHistoryView(View):
             context['history'] = Visit.objects.filter(user=request.user).exclude(end__isnull=True).all()
 
         return render(request, self.template, context)
+
+    def post(self, request):
+
+        context = self.get_context(request)
+
+        if request.user.is_staff:
+
+            form = AdminSearchForm(request.POST)
+
+            if form.is_valid():
+                # Get search keywords
+                search_keyword = request.POST['search_keyword']
+                search_type = request.POST['search_type']
+
+                context['total'] = 0
+
+                if search_type == 'room':
+
+                    context['rooms'] = Visit.objects.filter(room__name__contains=search_keyword)\
+                        .values('room').annotate(total=Count('room_id')).order_by('-total')
+
+                    for room in context['rooms']:
+                        room['users'] = Visit.objects\
+                            .filter(room__name__contains=search_keyword, room=room['room']).all()
+                        room['name'] = room['users'][0].room.name
+
+                        context['total'] += room['total']
+
+                elif search_type == 'username':
+
+                    context['users'] = Visit.objects.filter(user__username__contains=search_keyword) \
+                        .values('user').annotate(total=Count('user_id')).order_by('-total')
+
+                    for user in context['users']:
+                        user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
+                        user['username'] = user['visits'][0].user.username
+                        context['total'] += user['total']
+
+
+                #elif type == 'name':
+                    #TODO: implement name
+
+                context['search_keyword'] = search_keyword
+                context['search_type'] = search_type
+
+            return render(request, self.template, context)
