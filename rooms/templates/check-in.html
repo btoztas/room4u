@@ -182,10 +182,13 @@
                 <i class="fa fa-calendar-check-o"></i> Current Check-in
             </div>
             <div class="card-body">
-                {% if checked_in %}
+                 {% if checked_in %}
                     <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
                         since {{ checked_in_time }}</div>
-                    <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
+                    <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
+                    <a data-toggle="collapse" href="#usersInRoom">
+                        <button class="btn btn-secondary" type="button">Users in this Room</button>
+                    </a>
 
                 {% else %}
                     <div style="padding-bottom: inherit">You are not currently checked in.</div>
@@ -193,6 +196,19 @@
                 <a href="/room4u/check-in/history">
                     <button class="btn btn-secondary" type="button">History</button>
                 </a>
+            {% if checked_in %}
+                    <div class="table-responsive panel-collapse collapse" id="usersInRoom" style="padding-top: 10px">
+                        <table class="table" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for user in users_in_room %}
+                                <tr>
+                                    <td>{{ user.user.username }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
