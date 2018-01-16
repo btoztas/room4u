@@ -45,6 +45,12 @@
                         </li>
                     </ul>
                 </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Rooms">
+                    <a class="nav-link" href="/room4u/rooms">
+                        <i class="fa fa-fw fa-map-marker"></i>
+                        <span class="nav-link-text">Manage Rooms</span>
+                    </a>
+                </li>
             {% else %}
                 <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
                     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents"
@@ -66,18 +72,6 @@
                 <a class="nav-link" href="/room4u/messages">
                     <i class="fa fa-fw fa-envelope"></i>
                     <span class="nav-link-text">Messages</span>
-                </a>
-            </li>
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Users">
-                <a class="nav-link" href="/room4u/users">
-                    <i class="fa fa-fw fa-users"></i>
-                    <span class="nav-link-text">Manage Users</span>
-                </a>
-            </li>
-            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Rooms">
-                <a class="nav-link" href="/room4u/rooms">
-                    <i class="fa fa-fw fa-map-marker"></i>
-                    <span class="nav-link-text">Manage Rooms</span>
                 </a>
             </li>
         </ul>
@@ -118,7 +112,7 @@
                 </div>
                 <div class="modal-body"><span id="alertModalText"></span></div>
                 <div class="modal-footer">
-                    <button id = "but" onClick="window.location.reload()" class="btn btn-primary" type="button"
+                    <button id="but" onClick="window.location.reload()" class="btn btn-primary" type="button"
                             data-dismiss="modal">Ok
                     </button>
                 </div>
