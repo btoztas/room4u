@@ -122,7 +122,7 @@
                                 </td>
                                 <td width="10%">
                                     <a href="#">
-                                        <button class="btn btn-primary" id="{{ room.room }}" type="button">
+                                        <button class="btn btn-primary" id="{{ room.room }}" onclick="newMessageForm('{{ room.room }}')">
                                             <i class="fa fa-paper-plane"></i> Send Message</button>
                                     </a>
 
@@ -134,7 +134,7 @@
 
                                 </td>
                                 <td width="10%">
-                                    <a data-toggle="collapse" href="#{{ room.room }}">
+                                    <a data-toggle="collapse" href="#expand-{{ room.room }}">
                                         <button class="btn btn-secondary" type="button">Expand</button>
                                     </a>
                                 </td>
@@ -143,13 +143,19 @@
                         </table>
                     </div>
                     <div class="card-body ">
-                        <div class="table-responsive panel-collapse collapse" id="{{ room.room }}">
+                        <div class="table-responsive panel-collapse collapse" id="expand-{{ room.room }}">
                             <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                 <tbody>
                                 {% for user in room.users %}
                                     <tr>
                                         <td>{{ user.user.username }}</td>
                                         <td>{{ user.start }}</td>
+                                        <td>
+                                            <a href="#">
+                                                <button class="btn btn-primary" id="{{ user.user.username }}" onclick="newMessageForm2('{{ user.user.username }}')">
+                                                    <i class="fa fa-paper-plane"></i> Send Message</button>
+                                            </a>
+                                        </td>
                                     </tr>
                                 {% endfor %}
                                 </tbody>

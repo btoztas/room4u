@@ -88,14 +88,29 @@ class NewMessageHandlerView(View):
             if form.is_valid():
                 # process the data in form.cleaned_data as required
                 # ...
-                message = request.POST.get("message", "")
-                # redirect to a new URL:
-                instance = Message(title=str(request.POST.get("subject", "")),
-                                   text=str(request.POST.get("message", "")), sender=request.user,
-                                   receiver=request.user)
-                instance.save()
-                instance2 = NewMessage(message=instance)
-                instance2.save()
+                print (request.POST.get("destination", ""))
+                if request.POST.get("destflag", "") == "room":
+                    destination = Room.objects.filter(id=request.POST.get("destination", ""))
+                    users = Visit.objects.filter(room=destination, end__isnull=True)
+                    nusers = len(users)
+                    message = request.POST.get("message", "")
+                    for user in users:
+                        instance = Message(title=str(request.POST.get("subject", "")),
+                                           text=str(request.POST.get("message", "")), sender=request.user,
+                                           receiver=user.user)
+                        instance.save()
+                        instance2 = NewMessage(message=instance)
+                        instance2.save()
+                else:
+                    user = request.POST.get("destination", "")
+                    print (user)
+                    users = Visit.objects.filter(user__username=user, end__isnull=True).first()
+                    instance = Message(title=str(request.POST.get("subject", "")),
+                                       text=str(request.POST.get("message", "")), sender=request.user,
+                                       receiver=users.user)
+                    instance.save()
+                    instance2 = NewMessage(message=instance)
+                    instance2.save()
                 return HttpResponse(status=200)
 
     def get(self, request, *args, **kwargs):
@@ -108,7 +123,10 @@ class MessageView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        messages = Message.objects.all()
+        if request.user.username=="administrator":
+            messages = Message.objects.all()
+        else:
+            messages = Message.objects.filter(receiver=request.user)
         context = {
             'messages': messages,
             'username': request.user.username,

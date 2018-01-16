@@ -59,7 +59,7 @@
 
         <!--<label for="date">Filter by Date</label><br>-->
         <select name="date" id="date" style="width:210px" onchange="specificDate()">
-            <option value="year">Last year</option>
+            <option value="year" selected>Last year</option>
             <option value="6month">Last 6 months</option>
             <option value="month">Last month</option>
             <option value="week">Last Week</option>
@@ -67,7 +67,7 @@
             <option value="specific_date">Specific Date</option>
         </select>
 
-        <input type="hidden" id="sdate" name="sdate" placeholder="Search specific date...">
+        <input type="hidden" id="sdate" name="sdate" placeholder="Search specific date..." value="sdate">
 
         <input type="submit" value="Filter by Date" style="width:135px"><br><br><br>
 
