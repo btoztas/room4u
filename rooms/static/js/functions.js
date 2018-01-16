@@ -50,3 +50,69 @@ function check_out() {
     http.send();
 
 }
+
+$("#newmessage").submit(function(event) {
+
+
+    /* stop form from submitting normally */
+    event.preventDefault();
+
+    /* get the action attribute from the <form action=""> element */
+    var $form = $( this );//, url = $form.attr( 'action' );
+    var url = "/room4u/messages/handler"
+    var http = new XMLHttpRequest();
+    var rname = $('#rname').val();
+    var subject = $('#subject').val();
+    var message = $('#message').val();
+    var params = "rname=" + rname.toString() + "&subject=" + subject.toString() + "&message=" + message.toString();
+
+    /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
+
+    /* Alerts the results */
+    /*posting.done(function( data ) {
+        alert('success');
+    });*/
+    http.open("POST", url, true);
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    http.onreadystatechange = function () {
+
+        if (this.readyState == 4) {
+            replace('alertModalLabel', "New Message");
+            replace('but', "Return To Messages");
+            document.getElementById('but').onclick = function(){
+                window.location.href = "/room4u/messages";
+            }
+
+            if (this.status == 200) {
+                replace('alertModalText', "Message sent");
+            }else{
+                replace('alertModalText', "Could not send the message. Try again later");
+            }
+            $('#alertModal').modal('show');
+        }
+    };
+
+    http.send(params);
+
+});
+
+function income() {
+    $.ajax({
+        url:'/room4u/messages/incoming',
+        type: "POST",
+        success:function(data){  // success is the callback when the server
+            if (data != "nothing"){
+                var message = JSON.parse(data);
+                replace('alertModalLabel', "Message Received");
+                replace('but', "Ok");
+                replace('alertModalText', message[0].fields.text);
+                $('#alertModal').modal('show');
+            }
+        }
+    });
+}
+income(); // This will run on page load
+setInterval(function(){
+    income() // this will run after every 5 seconds
+}, 5000);

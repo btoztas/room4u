@@ -9,8 +9,10 @@ from django.views.generic import View
 from django.conf import settings
 import fenixedu
 from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
-from .models import Message, Room, Visit
+from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
+from django.core.serializers import serialize
+
 
 config = fenixedu.FenixEduConfiguration \
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -53,14 +55,32 @@ class NewMessageView(View):
     new_message_template = 'new_messages.html'
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.new_message_template)
+        if str(request.user) != "administrator":
+            return redirect('/room4u')
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff,
+        }
+        return render(request, self.new_message_template, context)
 
-
-class NewMessageHandlerView(View):
-    new_message_handler_template = 'new_message_handler.html'
+class IncomingMessageView(View):
 
     def post(self, request, *args, **kwargs):
-        # message = request.POST.get("message", "")
+        if not request.user.is_authenticated():
+            return redirect('/room4u')
+        # check if any
+        if not NewMessage.objects.filter(message__receiver=request.user.id):
+            return HttpResponse("nothing")
+        #filter
+        message = NewMessage.objects.filter(message__receiver=request.user.id).get()
+        NewMessage.objects.filter(id=message.id).delete()
+        return HttpResponse(serialize('json', [message.message, ]))
+
+class NewMessageHandlerView(View):
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return redirect('/room4u')
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = MessageForm(request.POST)
@@ -74,14 +94,20 @@ class NewMessageHandlerView(View):
                                    text=str(request.POST.get("message", "")), sender=request.user,
                                    receiver=request.user)
                 instance.save()
-                context = {'message': message}
-                return render(request, self.new_message_handler_template, context)
+                instance2 = NewMessage(message=instance)
+                instance2.save()
+                return HttpResponse(status=200)
+
+    def get(self, request, *args, **kwargs):
+        return redirect('/room4u')
 
 
 class MessageView(View):
     message_template = 'messages.html'
 
     def get(self, request, *args, **kwargs):
+        if not request.user.is_authenticated():
+            return redirect('/room4u')
         messages = Message.objects.all()
         context = {
             'messages': messages,
@@ -95,7 +121,8 @@ class MessageView(View):
         return render(request, self.message_template, context)
 
     def post(self, request, *args, **kwargs):
-        # message = request.POST.get("message", "")
+        if not request.user.is_authenticated():
+            return redirect('/room4u')
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = FilterForm(request.POST)
@@ -125,7 +152,15 @@ class MessageView(View):
                         messages = Message.objects.raw('SELECT * FROM rooms_message')
                     if str(date) == "specific_date":
                         messages = Message.objects.raw('SELECT * FROM rooms_message')
-                context = {'filter': filter, 'text': text, 'date': date, 'sdate': sdate, 'messages': messages}
+                context = {
+                    'username': request.user.username,
+                    'is_admin': request.user.is_staff,
+                    'filter': filter,
+                    'text': text,
+                    'date': date,
+                    'sdate': sdate,
+                    'messages': messages
+                }
                 return render(request, self.message_template, context)
 
 
