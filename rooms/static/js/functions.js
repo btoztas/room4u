@@ -56,6 +56,7 @@ $("#newmessage").submit(function(event) {
 
     /* stop form from submitting normally */
     event.preventDefault();
+    $('#messageModal').modal('hide');
 
     /* get the action attribute from the <form action=""> element */
     var $form = $( this );//, url = $form.attr( 'action' );
@@ -64,7 +65,9 @@ $("#newmessage").submit(function(event) {
     var rname = $('#rname').val();
     var subject = $('#subject').val();
     var message = $('#message').val();
-    var params = "rname=" + rname.toString() + "&subject=" + subject.toString() + "&message=" + message.toString();
+    var destination = $('#destination').val();
+    var destflag = $('#destflag').val();
+    var params = "rname=" + rname.toString() + "&subject=" + subject.toString() + "&message=" + message.toString() + "&destination=" + destination.toString() + "&destflag=" + destflag.toString();
 
     /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
 
@@ -96,6 +99,18 @@ $("#newmessage").submit(function(event) {
     http.send(params);
 
 });
+
+function newMessageForm(destination) {
+    document.getElementById("destination").value=destination;
+    document.getElementById("destflag").value="room";
+    $('#messageModal').modal('show');
+}
+
+function newMessageForm2(destination) {
+    document.getElementById("destination").value=destination;
+    document.getElementById("destflag").value="user";
+    $('#messageModal').modal('show');
+}
 
 function income() {
     $.ajax({
