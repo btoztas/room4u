@@ -113,6 +113,41 @@
             </div>
         </div>
     </div>
+    <!-- Message Modal-->
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">New Message</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id = "newmessage" action="/room4u/messages/handler" method="post">
+                    {% csrf_token %}
+
+                    <label for="rname">Room</label><br>
+                    <input type="text" id="rname" name="rname" placeholder="Room name..."><br>
+
+                    <label for="subject">Subject</label><br>
+                    <input type="text" id="subject" name="subject" placeholder="Message subject..."><br>
+
+                    <label for="message">Message</label><br>
+                    <textarea id="message" name="message" placeholder="Write your Message..." style="height:200px"></textarea>
+                    <br>
+                    <div class="modal-footer">
+                        <input type="submit" value="Send">
+                    </div>
+                  </form>
+                <!--<div class="modal-footer">
+                    <button id = "but1" onClick="window.location.reload()" class="btn btn-primary" type="button"
+                            data-dismiss="modal">Send
+                    </button>
+                </div>-->
+            </div>
+        </div>
+    </div>
     <!-- /.container-fluid-->
     <!-- /.content-wrapper-->
     <footer class="sticky-footer">
