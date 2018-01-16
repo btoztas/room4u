@@ -394,7 +394,7 @@ class CheckInHistoryView(View):
                 context['total'] += room['total']
 
         else:
-            context['history'] = Visit.objects.filter(user=request.user).exclude(end__isnull=True).all()
+            context['history'] = Visit.objects.filter(user=request.user).all()
 
         return render(request, self.template, context)
 
@@ -496,7 +496,7 @@ class RoomView(View):
 
         context['room'] = Room.objects.filter(id=room_id).first()
 
-        context['all_visits'] = Visit.objects.filter(room=context['room']).exclude(end__isnull=True).all()
+        context['all_visits'] = Visit.objects.filter(room=context['room']).all()
         context['all_visits_total'] = len(context['all_visits'])
 
         context['current_visits'] = Visit.objects.filter(room=context['room'], end__isnull=True).all()
@@ -559,7 +559,7 @@ class UserView(View):
 
         context['checked_in'] = Visit.objects.filter(user=context['user'], end__isnull=True).first()
 
-        context['all_visits'] = Visit.objects.filter(user=context['user']).exclude(end__isnull=True).all()
+        context['all_visits'] = Visit.objects.filter(user=context['user']).all()
         context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)
