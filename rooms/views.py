@@ -12,6 +12,7 @@ from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
 from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
+from django.contrib.auth.models import User
 
 config = fenixedu.FenixEduConfiguration \
     ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
@@ -500,5 +501,65 @@ class RoomView(View):
 
         context['current_visits'] = Visit.objects.filter(room=context['room'], end__isnull=True).all()
         context['current_total'] = len(context['current_visits'])
+
+        return render(request, self.template, context)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class UsersView(View):
+    template = 'users.html'
+
+    def get_context(self, request):
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context(request)
+
+        return render(request, self.template, context)
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context(request)
+
+        form = SearchRoomForm(request.POST)
+        if form.is_valid():
+            # Get search keywords
+            keyword = request.POST['keyword']
+
+            # Search for rooms in the db
+            context['users'] = User.objects.filter(username__contains=keyword).exclude(username='administrator').all()
+
+        return render(request, self.template, context)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class UserView(View):
+    template = 'user.html'
+
+    def get_context(self, request):
+
+        context = {
+            'username': request.user.username,
+            'is_admin': request.user.is_staff
+        }
+
+        return context
+
+    def get(self, request, *args, **kwargs):
+
+        context = self.get_context(request)
+
+        username = kwargs['username']
+
+        context['user'] = User.objects.filter(username=username).first()
+
+        context['checked_in'] = Visit.objects.filter(user=context['user'], end__isnull=True).first()
+
+        context['all_visits'] = Visit.objects.filter(user=context['user']).exclude(end__isnull=True).all()
+        context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)

@@ -3,7 +3,7 @@ from django.contrib.auth import views as auth_views
 from django.views.decorators.csrf import csrf_exempt
 
 from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView, \
-    CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView
+    CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView, UsersView, UserView
 
 urlpatterns = [
 
@@ -21,6 +21,8 @@ urlpatterns = [
     url(r'^check-out', csrf_exempt(CheckOutView.as_view())),
     url(r'^rooms/$', RoomsView.as_view()),
     url(r'^rooms/(?P<room_id>\d+)/$', RoomView.as_view()),
+    url(r'^users/$', UsersView.as_view()),
+    url(r'^users/(?P<username>.*)/$', UserView.as_view()),
     url(r'^admin-panel/$', auth_views.login, {'template_name': 'admin_login.html'}, name='admin_login'),
     url(r'^logout/$', auth_views.logout, {'next_page': '/room4u'}, name='logout'),
 
