@@ -185,12 +185,13 @@
                 <a href="/room4u/check-in">
                     <button class="btn btn-primary" type="button">New Check-in</button>
                 </a>
-
-                <a data-toggle="collapse" href="#usersInRoom">
-                    <button
-                            class="btn btn-secondary" type="button">Users in this Room
-                    </button>
-                </a>
+                {% if checked_in %}
+                    <a data-toggle="collapse" href="#usersInRoom">
+                        <button
+                                class="btn btn-secondary" type="button">Users in this Room
+                        </button>
+                    </a>
+                {% endif %}
                 {% if checked_in %}
                     <div class="table-responsive panel-collapse collapse" id="usersInRoom" style="padding-top: 10px">
                         <table class="table" id="dataTable" width="100%" cellspacing="0">
