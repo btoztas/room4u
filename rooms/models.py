@@ -4,7 +4,7 @@ from django.utils import timezone
 
 
 class Room(models.Model):
-    id = models.CharField(primary_key=True, editable=False, max_length=15)
+    id = models.CharField(primary_key=True, editable=False, max_length=32)
     parent_id = models.CharField(max_length=15)
     name = models.CharField(max_length=15)
     created_at = models.DateTimeField(editable=False)
