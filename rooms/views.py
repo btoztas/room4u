@@ -1,7 +1,7 @@
 import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -55,7 +55,8 @@ class IndexView(View):
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
                 context['checked_in_time'] = current_check_in.start
-                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
+                    '-start').all()
 
         return context
 
@@ -107,7 +108,7 @@ class NewMessageHandlerView(View):
             if form.is_valid():
                 # process the data in form.cleaned_data as required
                 # ...
-                print (request.POST.get("destination", ""))
+                print(request.POST.get("destination", ""))
                 if request.POST.get("destflag", "") == "room":
                     destination = Room.objects.filter(id=request.POST.get("destination", ""))
                     users = Visit.objects.filter(room=destination, end__isnull=True)
@@ -122,7 +123,7 @@ class NewMessageHandlerView(View):
                         instance2.save()
                 else:
                     user = request.POST.get("destination", "")
-                    print (user)
+                    print(user)
                     users = Visit.objects.filter(user__username=user, end__isnull=True).first()
                     instance = Message(title=str(request.POST.get("subject", "")),
                                        text=str(request.POST.get("message", "")), sender=request.user,
@@ -142,7 +143,7 @@ class MessageView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        if request.user.username=="administrator":
+        if request.user.username == "administrator":
             messages = Message.objects.all()
         else:
             messages = Message.objects.filter(receiver=request.user)
@@ -253,7 +254,8 @@ class CheckInView(View):
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
                 context['checked_in_time'] = current_check_in.start
-                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
+                    '-start').all()
 
         return context
 
@@ -266,7 +268,7 @@ class CheckInView(View):
                 order_by('-total')
             context['total'] = 0
             for room in context['rooms']:
-                room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).all()
+                room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
                 context['total'] += room['total']
 
@@ -294,7 +296,8 @@ class CheckInView(View):
 
                     for room in context['rooms']:
                         room['users'] = Visit.objects \
-                            .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).all()
+                            .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).order_by(
+                            '-start').all()
                         room['name'] = room['users'][0].room.name
 
                         context['total'] += room['total']
@@ -304,8 +307,19 @@ class CheckInView(View):
                         .all()
                     context['total'] = len(context['users'])
 
-                    # elif type == 'name':
-                    # TODO: implement name
+                elif search_type == 'name':
+
+                    context['users'] = Visit.objects.filter(Q(user__first_name__contains=search_keyword) |
+                                                            Q(user__last_name__contains=search_keyword)) \
+                        .exclude(user__is_staff=True).values('user').annotate(total=Count('user_id')).order_by('-total')
+
+                    for user in context['users']:
+                        user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
+                        user['username'] = user['visits'][0].user.username
+                        user['last_name'] = user['visits'][0].user.last_name
+                        user['first_name'] = user['visits'][0].user.first_name
+
+                    context['total'] = len(context['users'])
 
                 context['search_keyword'] = search_keyword
                 context['search_type'] = search_type
@@ -334,6 +348,10 @@ class NewCheckInView(View):
         current_check_in = Visit.objects.filter(user=request.user, end__isnull=True).first()
 
         if current_check_in:
+
+            if current_check_in.room == room:
+                return HttpResponse(status=409)
+
             current_check_in.end = start
             current_check_in.save()
 
@@ -376,7 +394,8 @@ class CheckInHistoryView(View):
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
                 context['checked_in_time'] = current_check_in.start
-                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).all()
+                context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
+                    '-start').all()
 
         return context
 
@@ -389,12 +408,12 @@ class CheckInHistoryView(View):
                 order_by('-total')
             context['total'] = 0
             for room in context['rooms']:
-                room['users'] = Visit.objects.filter(room=room['room']).all()
+                room['users'] = Visit.objects.filter(room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
                 context['total'] += room['total']
 
         else:
-            context['history'] = Visit.objects.filter(user=request.user).all()
+            context['history'] = Visit.objects.filter(user=request.user).order_by('-start').all()
 
         return render(request, self.template, context)
 
@@ -420,7 +439,7 @@ class CheckInHistoryView(View):
 
                     for room in context['rooms']:
                         room['users'] = Visit.objects \
-                            .filter(room__name__contains=search_keyword, room=room['room']).all()
+                            .filter(room__name__contains=search_keyword, room=room['room']).order_by('-start').all()
                         room['name'] = room['users'][0].room.name
 
                         context['total'] += room['total']
@@ -428,17 +447,29 @@ class CheckInHistoryView(View):
                 elif search_type == 'username':
 
                     context['users'] = Visit.objects.filter(user__username__contains=search_keyword) \
-                        .values('user').annotate(total=Count('user_id')).order_by('-total')
+                        .exclude(user__is_staff=True).values('user').annotate(total=Count('user_id')).order_by('-total')
 
                     for user in context['users']:
                         user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
                         user['username'] = user['visits'][0].user.username
+                        user['last_name'] = user['visits'][0].user.last_name
+                        user['first_name'] = user['visits'][0].user.first_name
 
                     context['total'] = len(context['users'])
 
+                elif search_type == 'name':
 
-                    # elif type == 'name':
-                    # TODO: implement name
+                    context['users'] = Visit.objects.filter(Q(user__first_name__contains=search_keyword) |
+                                                            Q(user__last_name__contains=search_keyword)) \
+                        .exclude(user__is_staff=True).values('user').annotate(total=Count('user_id')).order_by('-total')
+
+                    for user in context['users']:
+                        user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
+                        user['username'] = user['visits'][0].user.username
+                        user['last_name'] = user['visits'][0].user.last_name
+                        user['first_name'] = user['visits'][0].user.first_name
+
+                    context['total'] = len(context['users'])
 
                 context['search_keyword'] = search_keyword
                 context['search_type'] = search_type
@@ -496,10 +527,11 @@ class RoomView(View):
 
         context['room'] = Room.objects.filter(id=room_id).first()
 
-        context['all_visits'] = Visit.objects.filter(room=context['room']).all()
+        context['all_visits'] = Visit.objects.filter(room=context['room']).order_by('-start').all()
         context['all_visits_total'] = len(context['all_visits'])
 
-        context['current_visits'] = Visit.objects.filter(room=context['room'], end__isnull=True).all()
+        context['current_visits'] = Visit.objects.filter(room=context['room'], end__isnull=True).order_by(
+            '-start').all()
         context['current_total'] = len(context['current_visits'])
 
         return render(request, self.template, context)
@@ -531,7 +563,10 @@ class UsersView(View):
             keyword = request.POST['keyword']
 
             # Search for rooms in the db
-            context['users'] = User.objects.filter(username__contains=keyword).exclude(username='administrator').all()
+            context['users'] = User.objects.filter(Q(username__contains=keyword) |
+                                                   Q(first_name__contains=keyword) |
+                                                   Q(last_name__contains=keyword))\
+                .exclude(is_staff=True).all()
 
         return render(request, self.template, context)
 
@@ -541,7 +576,6 @@ class UserView(View):
     template = 'user.html'
 
     def get_context(self, request):
-
         context = {
             'username': request.user.username,
             'is_admin': request.user.is_staff
@@ -550,7 +584,6 @@ class UserView(View):
         return context
 
     def get(self, request, *args, **kwargs):
-
         context = self.get_context(request)
 
         username = kwargs['username']
@@ -559,7 +592,7 @@ class UserView(View):
 
         context['checked_in'] = Visit.objects.filter(user=context['user'], end__isnull=True).first()
 
-        context['all_visits'] = Visit.objects.filter(user=context['user']).all()
+        context['all_visits'] = Visit.objects.filter(user=context['user']).order_by('-start').all()
         context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)

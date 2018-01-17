@@ -6,7 +6,7 @@
         <li class="breadcrumb-item">
             <a href="/room4u">room4u</a>
         </li>
-        <li class="breadcrumb-item active">Users</li>
+        <li class="breadcrumb-item active"><a href="/room4u/users">Users</a></li>
         <li class="breadcrumb-item active">{{ user.username }}</li>
     </ol>
 
@@ -16,11 +16,12 @@
         </div>
         <div class="card-body ">
             <div align="center">
-                <h2>{{ user.username }}</h2>
+                <h2>{{ user.first_name }} {{ user.last_name }}</h2>
                 <div align="center">
-                    <img src="https://fenix.tecnico.ulisboa.pt/user/photo/{{ user.username }}"
-                         width="10%"/>
+                    <img style="padding: 10px" src="https://fenix.tecnico.ulisboa.pt/user/photo/{{ user.username }}"
+                         width="15%"/>
                 </div>
+                <h5>{{ user.username }}</h5>
             </div>
         </div>
     </div>
@@ -52,7 +53,7 @@
                         <tbody>
                         {% for visit in all_visits %}
                             <tr>
-                                <td>{{ visit.user.username }}</td>
+                                <td>{{ visit.room.name}}</td>
                                 <td>{{ visit.start }}</td>
                                 <td>{{ visit.end }}</td>
                             </tr>

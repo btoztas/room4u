@@ -17,6 +17,9 @@ function check_in(room_id, room_name) {
             replace('alertModalLabel', "Check-in Status");
             if (this.status == 200) {
                 replace('alertModalText', "Successful check-in at " + room_name + ".");
+            }
+            else if (this.status == 409) {
+                replace('alertModalText', "You are already checked-in at " + room_name + ".");
             } else {
                 replace('alertModalText', "Could not check-in at " + room_name + ".");
             }

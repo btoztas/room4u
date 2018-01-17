@@ -6,7 +6,7 @@
         <li class="breadcrumb-item">
             <a href="/room4u">room4u</a>
         </li>
-        <li class="breadcrumb-item active">Check-in</li>
+        <li class="breadcrumb-item active"><a href="/room4u/check-in">Check-in</a></li>
         <li class="breadcrumb-item active">History</li>
     </ol>
 
@@ -88,10 +88,10 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-user"></i>
-                                    <b>{{ user.username }}</b> - {{ user.total }} Check-ins
+                                    <b>{{ user.first_name }} {{ user.last_name }}</b> - {{ user.username }} - {{ user.total }} Check-ins
                                 </td>
                                 <td width="10%">
-                                    <a href="#">
+                                    <a href="/room4u/users/{{ user.username }}">
                                         <button class="btn btn-primary" type="button">View User</button>
                                     </a>
                                 </td>
@@ -155,6 +155,7 @@
                                 {% for user in room.users %}
                                     <tr>
                                         <td>{{ user.user.username }}</td>
+                                        <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                         <td>{{ user.start }}</td>
                                         <td>{{ user.end }}</td>
                                     </tr>
@@ -199,6 +200,7 @@
                             {% for user in users_in_room %}
                                 <tr>
                                     <td>{{ user.user.username }}</td>
+                                    <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

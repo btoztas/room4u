@@ -17,9 +17,9 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_username">Enter a user</label>
+                    <label for="id_username">Enter an username, first name or last name</label>
                     <input class="form-control" id="id_username" type="text" name="keyword"
-                           placeholder="Example: istXXXXXX">
+                           placeholder="Example: istXXXXXX or João">
                 </div>
                 <button class="btn btn-primary btn-block" type="submit">Search User</button>
             </form>
@@ -32,7 +32,8 @@
                         <tbody>
                         {% for user in users %}
                             <tr>
-                                <td width="80%">{{ user }}</td>
+                                <td width="20%">{{ user }}</td>
+                                <td width="80%">{{ user.first_name }} {{ user.last_name }}</td>
                                 <td width="10%">
                                     <button class="btn btn-secondary btn-block" type="submit"
                                             onclick="window.location.href='/room4u/users/{{ user }}'" >
