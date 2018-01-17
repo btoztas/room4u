@@ -43,6 +43,7 @@
                             {% for user in users_in_room %}
                                 <tr>
                                     <td>{{ user.user.username }}</td>
+                                    <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>

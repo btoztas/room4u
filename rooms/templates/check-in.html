@@ -87,11 +87,11 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-user"></i>
-                                    <b>{{ user.user.username }}</b> | <i class="fa fa-map-pin"></i> {{ user.room.name }}
+                                    <b> {{ user.user.first_name }} {{ user.user.last_name }} - {{ user.user.username }}</b> | <i class="fa fa-map-pin"></i> {{ user.room.name }}
                                 </td>
                                 <td width="10%">
 
-                                    <a href="#">
+                                    <a href="/room4u/users/{{ user.user.username }}">
                                         <button class="btn btn-primary" type="button">View User</button>
                                     </a>
                                 </td>
@@ -122,8 +122,10 @@
                                 </td>
                                 <td width="10%">
                                     <a href="#">
-                                        <button class="btn btn-primary" id="{{ room.room }}" onclick="newMessageForm('{{ room.room }}')">
-                                            <i class="fa fa-paper-plane"></i> Send Message</button>
+                                        <button class="btn btn-primary" id="{{ room.room }}"
+                                                onclick="newMessageForm('{{ room.room }}')">
+                                            <i class="fa fa-paper-plane"></i> Send Message
+                                        </button>
                                     </a>
 
                                 </td>
@@ -149,11 +151,14 @@
                                 {% for user in room.users %}
                                     <tr>
                                         <td>{{ user.user.username }}</td>
+                                        <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                         <td>{{ user.start }}</td>
                                         <td>
                                             <a href="#">
-                                                <button class="btn btn-primary" id="{{ user.user.username }}" onclick="newMessageForm2('{{ user.user.username }}')">
-                                                    <i class="fa fa-paper-plane"></i> Send Message</button>
+                                                <button class="btn btn-primary" id="{{ user.user.username }}"
+                                                        onclick="newMessageForm2('{{ user.user.username }}')">
+                                                    <i class="fa fa-paper-plane"></i> Send Message
+                                                </button>
                                             </a>
                                         </td>
                                     </tr>
@@ -182,7 +187,7 @@
                 <i class="fa fa-calendar-check-o"></i> Current Check-in
             </div>
             <div class="card-body">
-                 {% if checked_in %}
+                {% if checked_in %}
                     <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
                         since {{ checked_in_time }}</div>
                     <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
@@ -196,13 +201,14 @@
                 <a href="/room4u/check-in/history">
                     <button class="btn btn-secondary" type="button">History</button>
                 </a>
-            {% if checked_in %}
+                {% if checked_in %}
                     <div class="table-responsive panel-collapse collapse" id="usersInRoom" style="padding-top: 10px">
                         <table class="table" id="dataTable" width="100%" cellspacing="0">
                             <tbody>
                             {% for user in users_in_room %}
                                 <tr>
                                     <td>{{ user.user.username }}</td>
+                                    <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
