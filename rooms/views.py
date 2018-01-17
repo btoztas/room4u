@@ -1,3 +1,4 @@
+import os
 import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -14,10 +15,19 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
 
-config = fenixedu.FenixEduConfiguration \
-    ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
-     'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
-     'https://fenix.tecnico.ulisboa.pt/')
+if 'RDS_DB_NAME' in os.environ:
+
+    config = fenixedu.FenixEduConfiguration \
+        ('1132965128044595', 'http://room4u-mysql-env.xrjug35ebn.eu-west-1.elasticbeanstalk.com/room4u/auth',
+         '3BjrjgA8DEYSQ545ozu/usJ4QjeTLTsWFOrDceUmNHprUVYGDnOHhfml2wI+W9CUwviQ5vP5OvKoFTbVtkdRgg==',
+         'https://fenix.tecnico.ulisboa.pt/')
+
+else:
+
+    config = fenixedu.FenixEduConfiguration \
+        ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
+         'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
+         'https://fenix.tecnico.ulisboa.pt/')
 
 client = fenixedu.FenixEduClient(config)
 
