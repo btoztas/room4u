@@ -1,5 +1,4 @@
 import os
-import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -191,8 +190,8 @@ class MessageView(View):
                     messages = Message.objects.filter(room__contains=str(text))
                 else:
                     if str(date) == "year":
-                        startdate=timezone.today()
-                        enddate = timezone.today().replace(year=timezone.today().year-1)
+                        startdate = timezone.today()
+                        enddate = timezone.today().replace(year=timezone.today().year - 1)
                         messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "6month":
                         startdate = timezone.today()
@@ -211,7 +210,8 @@ class MessageView(View):
                         enddate = timezone.now().today().replace(hour=0)
                         messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "specific_date":
-                        messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1], created_at__day=datee[2])
+                        messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
+                                                          created_at__day=datee[2])
                 context = {
                     'username': request.user.username,
                     'is_admin': request.user.is_staff,
@@ -225,33 +225,9 @@ class MessageView(View):
 
 
 class ApiView(View):
-    base_url = 'https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/'
-
-    def retrieve_space(self, space_parent, space_to_explore):
-
-        # Request space's info
-        r = requests.get(self.base_url + space_to_explore)
-        space_info = r.json()
-
-        # Create new space object with the info retrieved
-        new_space = Room(id=space_info['id'], parent_id=space_parent, name=space_info['name'])
-        new_space.save()
-
-        # Explore other contained spaces within this space
-        for contained_space in space_info['containedSpaces']:
-            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=space_info['id'])
 
     def get(self, request, *args, **kwargs):
-
-        # Request space's info - this will be the campuses (roots of the tree)
-        r = requests.get(self.base_url)
-        campuses = r.json()
-
-        # Explore spaces contained within the campus
-        for campus_index in range(0, len(campuses)):
-            campus_id = campuses[campus_index]['id']
-            self.retrieve_space(space_to_explore=campus_id, space_parent=0)
-
+    
         return HttpResponse("done")
 
 

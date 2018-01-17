@@ -18,24 +18,21 @@
     <link href="{% static 'bootstrap/css/sb-admin.css' %}" rel="stylesheet">
 </head>
 
+
 <body class="bg-dark">
-<div align="center" style=" position: absolute; margin: auto;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 500px;
-  height: 135px;
-  background-color: #ccc;
-  border-radius: 3px;">
-    <div class="main_title">
-        <h1 class="main_title"> Welcome to room4u</h1>
-        <h5> Please login using the Fenix platform.</h5>
-            <button class="btn btn-primary"
+<div class="container">
+    <div class="card card-login mx-auto mt-5" align="center">
+        <div class="card-header"><h1>Welcome to room4u</h1></div>
+        <div class="card-body">
+            <h5 style="padding-bottom: inherit"> Please login using the Fenix platform.</h5>
+
+               <button class="btn btn-primary"
                     onclick="location.href = '{{ auth_url }}'" type="button"><i class="fa fa-sign-in" aria-hidden="true"></i> Login
             </button>
+        </div>
     </div>
 </div>
+
 <!-- Bootstrap core JavaScript-->
 <script src="{% static 'bootstrap/vendor/jquery/jquery.min.js' %}"></script>
 <script src="{% static 'bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
