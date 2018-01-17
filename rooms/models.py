@@ -47,5 +47,6 @@ class Visit(models.Model):
         self.modified_at = timezone.now()
         return super(Visit, self).save(*args, **kwargs)
 
+
 class NewMessage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='message')

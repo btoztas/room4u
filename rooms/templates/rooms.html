@@ -6,37 +6,36 @@
         <li class="breadcrumb-item">
             <a href="/room4u">room4u</a>
         </li>
-        <li class="breadcrumb-item active">Users</li>
+        <li class="breadcrumb-item active">Rooms</li>
     </ol>
 
     <div class="card mb-3">
         <div class="card-header">
-            <i class="fa fa-search"></i> Find Users
+            <i class="fa fa-search"></i> Find Rooms
         </div>
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_username">Enter an username, first name or last name</label>
+                    <label for="id_username">Enter a room</label>
                     <input class="form-control" id="id_username" type="text" name="keyword"
-                           placeholder="Example: istXXXXXX or João">
+                           placeholder="Example: GA4">
                 </div>
-                <button class="btn btn-primary btn-block" type="submit">Search User</button>
+                <button class="btn btn-primary btn-block" type="submit">Search Room</button>
             </form>
         </div>
 
-        {% if users %}
+        {% if rooms %}
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                         <tbody>
-                        {% for user in users %}
+                        {% for room in rooms %}
                             <tr>
-                                <td width="20%">{{ user }}</td>
-                                <td width="80%">{{ user.first_name }} {{ user.last_name }}</td>
+                                <td width="80%">{{ room.name }}</td>
                                 <td width="10%">
                                     <button class="btn btn-secondary btn-block" type="submit"
-                                            onclick="window.location.href='/room4u/users/{{ user }}'" >
+                                            onclick="window.location.href='/room4u/rooms/{{ room.id }}'" >
                                         View
                                     </button>
                                 </td>

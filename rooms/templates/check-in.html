@@ -87,17 +87,17 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-user"></i>
-                                    <b>{{ user.user.username }}</b> | <i class="fa fa-map-pin"></i> {{ user.room.name }}
+                                    <b> {{ user.user.first_name }} {{ user.user.last_name }} - {{ user.user.username }}</b> | <i class="fa fa-map-pin"></i> {{ user.room.name }}
                                 </td>
                                 <td width="10%">
 
-                                    <a href="#">
+                                    <a href="/room4u/users/{{ user.user.username }}">
                                         <button class="btn btn-primary" type="button">View User</button>
                                     </a>
                                 </td>
                                 <td width="10%">
 
-                                    <a href="#">
+                                    <a href="/room4u/rooms/{{ user.room.id }}">
                                         <button class="btn btn-primary" type="button">View Room</button>
                                     </a>
                                 </td>
@@ -122,13 +122,15 @@
                                 </td>
                                 <td width="10%">
                                     <a href="#">
-                                        <button class="btn btn-primary" id="{{ room.room }}" onclick="newMessageForm('{{ room.room }}')">
-                                            <i class="fa fa-paper-plane"></i> Send Message</button>
+                                        <button class="btn btn-primary" id="{{ room.room }}"
+                                                onclick="newMessageForm('{{ room.room }}')">
+                                            <i class="fa fa-paper-plane"></i> Send Message
+                                        </button>
                                     </a>
 
                                 </td>
                                 <td width="10%">
-                                    <a href="#">
+                                    <a href="/room4u/rooms/{{ room.room }}">
                                         <button class="btn btn-primary" type="button">View Room</button>
                                     </a>
 
@@ -149,11 +151,14 @@
                                 {% for user in room.users %}
                                     <tr>
                                         <td>{{ user.user.username }}</td>
+                                        <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                         <td>{{ user.start }}</td>
                                         <td>
                                             <a href="#">
-                                                <button class="btn btn-primary" id="{{ user.user.username }}" onclick="newMessageForm2('{{ user.user.username }}')">
-                                                    <i class="fa fa-paper-plane"></i> Send Message</button>
+                                                <button class="btn btn-primary" id="{{ user.user.username }}"
+                                                        onclick="newMessageForm2('{{ user.user.username }}')">
+                                                    <i class="fa fa-paper-plane"></i> Send Message
+                                                </button>
                                             </a>
                                         </td>
                                     </tr>
@@ -174,7 +179,6 @@
                 <a href="/room4u">room4u</a>
             </li>
             <li class="breadcrumb-item active">Check-in</li>
-            <li class="breadcrumb-item active">New</li>
         </ol>
 
         <div class="card mb-3">
@@ -185,7 +189,10 @@
                 {% if checked_in %}
                     <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
                         since {{ checked_in_time }}</div>
-                    <button class="btn btn-secondary" type="button" onclick="check_out()">Check-out</button>
+                    <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
+                    <a data-toggle="collapse" href="#usersInRoom">
+                        <button class="btn btn-secondary" type="button">Users in this Room</button>
+                    </a>
 
                 {% else %}
                     <div style="padding-bottom: inherit">You are not currently checked in.</div>
@@ -193,6 +200,20 @@
                 <a href="/room4u/check-in/history">
                     <button class="btn btn-secondary" type="button">History</button>
                 </a>
+                {% if checked_in %}
+                    <div class="table-responsive panel-collapse collapse" id="usersInRoom" style="padding-top: 10px">
+                        <table class="table" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for user in users_in_room %}
+                                <tr>
+                                    <td>{{ user.user.username }}</td>
+                                    <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
@@ -221,11 +242,9 @@
                             {% for room in rooms %}
                                 <tr>
                                     <td width="80%">{{ room.name }}</td>
+
                                     <td width="10%">
-                                        <button class="btn btn-secondary btn-block" type="submit">View</button>
-                                    </td>
-                                    <td width="10%">
-                                        <button class="btn btn-secondary btn-block" type="submit"
+                                        <button class="btn btn-primary btn-block" type="submit"
                                                 onclick="check_in('{{ room.id }}', '{{ room.name }}')">Check-in
                                         </button>
                                     </td>

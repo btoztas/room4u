@@ -17,7 +17,10 @@ function check_in(room_id, room_name) {
             replace('alertModalLabel', "Check-in Status");
             if (this.status == 200) {
                 replace('alertModalText', "Successful check-in at " + room_name + ".");
-            }else{
+            }
+            else if (this.status == 409) {
+                replace('alertModalText', "You are already checked-in at " + room_name + ".");
+            } else {
                 replace('alertModalText', "Could not check-in at " + room_name + ".");
             }
             $('#alertModal').modal('show');
@@ -40,7 +43,7 @@ function check_out() {
             replace('alertModalLabel', "Check-out Status");
             if (this.status == 200) {
                 replace('alertModalText', "Checked-out with success.");
-            }else{
+            } else {
                 replace('alertModalText', "Could not check-out.");
             }
             $('#alertModal').modal('show');
@@ -51,7 +54,8 @@ function check_out() {
 
 }
 
-$("#newmessage").submit(function(event) {
+
+$("#newmessage").submit(function (event) {
 
 
     /* stop form from submitting normally */
@@ -59,7 +63,7 @@ $("#newmessage").submit(function(event) {
     $('#messageModal').modal('hide');
 
     /* get the action attribute from the <form action=""> element */
-    var $form = $( this );//, url = $form.attr( 'action' );
+    var $form = $(this);//, url = $form.attr( 'action' );
     var url = "/room4u/messages/handler"
     var http = new XMLHttpRequest();
     var rname = $('#rname').val();
@@ -71,10 +75,10 @@ $("#newmessage").submit(function(event) {
 
     /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
 
-    /* Alerts the results */
+     /* Alerts the results */
     /*posting.done(function( data ) {
-        alert('success');
-    });*/
+     alert('success');
+     });*/
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 
@@ -83,13 +87,13 @@ $("#newmessage").submit(function(event) {
         if (this.readyState == 4) {
             replace('alertModalLabel', "New Message");
             replace('but', "Return To Messages");
-            document.getElementById('but').onclick = function(){
+            document.getElementById('but').onclick = function () {
                 window.location.href = "/room4u/messages";
             }
 
             if (this.status == 200) {
                 replace('alertModalText', "Message sent");
-            }else{
+            } else {
                 replace('alertModalText', "Could not send the message. Try again later");
             }
             $('#alertModal').modal('show');
@@ -114,10 +118,10 @@ function newMessageForm2(destination) {
 
 function income() {
     $.ajax({
-        url:'/room4u/messages/incoming',
+        url: '/room4u/messages/incoming',
         type: "POST",
-        success:function(data){  // success is the callback when the server
-            if (data != "nothing"){
+        success: function (data) {  // success is the callback when the server
+            if (data != "nothing") {
                 var message = JSON.parse(data);
                 replace('alertModalLabel', "Message Received");
                 replace('but', "Ok");
@@ -127,7 +131,8 @@ function income() {
         }
     });
 }
+
 income(); // This will run on page load
-setInterval(function(){
+setInterval(function () {
     income() // this will run after every 5 seconds
 }, 5000);
