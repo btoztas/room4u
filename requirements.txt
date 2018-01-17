@@ -1,3 +1,4 @@
 django==1.11
 fenixedu
 fenixedu-django
+MySQL-python
