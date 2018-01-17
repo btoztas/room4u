@@ -25,7 +25,7 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
+    'room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
     '127.0.0.1',
 ]
 
@@ -135,7 +135,7 @@ AUTHENTICATION_BACKENDS = [
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
 if 'RDS_DB_NAME' in os.environ:
-    SITE_URL = 'http://room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+    SITE_URL = 'http://room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 
