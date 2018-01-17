@@ -8,17 +8,22 @@ class Command(BaseCommand):
     base_url = 'https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/'
 
     def retrieve_space(self, space_parent, space_to_explore):
+
         # Request space's info
         r = requests.get(self.base_url + space_to_explore)
         space_info = r.json()
 
         # Create new space object with the info retrieved
-        new_space = Room(id=space_info['id'], parent_id=space_parent, name=space_info['name'])
+        if space_parent == 0:
+            new_space = Room(id=space_info['id'], name=space_info['name'])
+        else:
+            new_space = Room(id=space_info['id'], parent_id=space_parent, name=space_info['name'])
+
         new_space.save()
 
         # Explore other contained spaces within this space
         for contained_space in space_info['containedSpaces']:
-            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=space_info['id'])
+            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=new_space)
 
     def handle(self, *args, **options):
 
