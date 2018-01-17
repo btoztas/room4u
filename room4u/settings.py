@@ -24,7 +24,9 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
+                 '127.0.0.1',
+                 ]
 
 # Application definition
 
