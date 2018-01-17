@@ -20,7 +20,7 @@ class Room(models.Model):
 class Message(models.Model):
     title = models.CharField(max_length=50)
     text = models.CharField(max_length=500)
-    #room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='room')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
     created_at = models.DateTimeField(editable=False)

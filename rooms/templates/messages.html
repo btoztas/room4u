@@ -9,10 +9,7 @@
     </ol><br>
     <p>The filter is {{ filter }} and the text is {{ text }} and date is {{ date }} and sdate is {{ sdate }}</p>
     <!--<a href="/room4u/messages/new"><img border="0" alt="New Message" src="/static/images/aaa.jpeg" width="40" height="40">New Message</a> <br>-->
-
-
     <a id = "new" href="/room4u/messages/new" style="color:black"><i class="fa fa-paper-plane" aria-hidden="true"> New Message</i></a>
-
     <script>
         if ("{{ username }}"!="administrator") {
             document.getElementById('new').style.visibility = "hidden";
@@ -23,6 +20,7 @@
     </script>
 
     <br><br><br>
+    <div class="card-body ">
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
 
@@ -72,6 +70,7 @@
         <input type="submit" value="Filter by Date" style="width:135px"><br><br><br>
 
     </form>
+    </div>
     <div class="card mb-3">
         <div class="card-header">
             <i class="fa fa-table"></i> Registo de Mensagens
@@ -94,7 +93,7 @@
                         <tr>
                             <td>{{ message.sender }}</td>
                             <td>{{ message.receiver }}</td>
-                            <td>room</td>
+                            <td>{{ message.room.name }}</td>
                             <td>{{ message.created_at }}</td>
                             <td>{{ message.title }}</td>
                             <td>{{ message.text }}</td>
@@ -110,8 +109,10 @@
         function specificDate() {
             var text = document.getElementById("date").value;
             if (text.toString() == "specific_date") {
-                document.getElementById("sdate").type = "text";
+                document.getElementById("sdate").outerHTML = "<input type =\"date\" id = \"sdate\" name=\"sdate\" class=\"form-control\" style=\"width: 250px\">";
+                //<p>Date: <input type="text" id="datepicker"></p>
             } else {
+                document.getElementById("sdate").outerHTML = "<input type =\"hidden\" id = \"sdate\" name=\"sdate\" class=\"form-control\" style=\"width: 250px\">";
                 document.getElementById("sdate").value = "text";
             }
         }
