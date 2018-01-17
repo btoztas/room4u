@@ -32,7 +32,9 @@
                         <tbody>
                         {% for room in rooms %}
                             <tr>
-                                <td width="80%">{{ room.name }}</td>
+                                <td width="80%">
+                                    <font color="DimGray">{{ room.hierarchy }}/</font>{{ room.name }}
+                                </td>
                                 <td width="10%">
                                     <button class="btn btn-secondary btn-block" type="submit"
                                             onclick="window.location.href='/room4u/rooms/{{ room.id }}'" >

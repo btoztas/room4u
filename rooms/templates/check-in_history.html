@@ -88,7 +88,8 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-user"></i>
-                                    <b>{{ user.first_name }} {{ user.last_name }}</b> - {{ user.username }} - {{ user.total }} Check-ins
+                                    <b>{{ user.first_name }} {{ user.last_name }}</b> - {{ user.username }}
+                                    - {{ user.total }} Check-ins
                                 </td>
                                 <td width="10%">
                                     <a href="/room4u/users/{{ user.username }}">
@@ -110,7 +111,7 @@
                                 <tbody>
                                 {% for visit in user.visits %}
                                     <tr>
-                                        <td>{{ visit.room.name }}</td>
+                                        <td>{{ visit.room.hierarchy }}/{{ visit.room.name }}</td>
                                         <td>{{ visit.start }}</td>
                                         <td>{{ visit.end }}</td>
                                     </tr>
@@ -130,7 +131,7 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-map-pin"></i>
-                                    <b>{{ room.name }}</b> -
+                                    {{ room.hierarchy }}/{{ room.name }} -
                                     {{ room.total }} Check-in{% if room.total > 1 %}s{% endif %}
                                 </td>
                                 <td width="10%">
@@ -229,7 +230,7 @@
                             <tbody>
                             {% for record in history %}
                                 <tr>
-                                    <td>{{ record.room.name }}</td>
+                                    <td>{{ record.room.hierarchy }}/{{ record.room.name }}</td>
                                     <td>{{ record.start }}</td>
                                     <td>{{ record.end }}</td>
                                 </tr>
