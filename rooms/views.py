@@ -127,7 +127,7 @@ class NewMessageHandlerView(View):
                     for user in users:
                         instance = Message(title=str(request.POST.get("subject", "")),
                                            text=str(request.POST.get("message", "")), sender=request.user,
-                                           receiver=user.user)
+                                           receiver=user.user, room=user.room)
                         instance.save()
                         instance2 = NewMessage(message=instance)
                         instance2.save()
@@ -137,7 +137,7 @@ class NewMessageHandlerView(View):
                     users = Visit.objects.filter(user__username=user, end__isnull=True).first()
                     instance = Message(title=str(request.POST.get("subject", "")),
                                        text=str(request.POST.get("message", "")), sender=request.user,
-                                       receiver=users.user)
+                                       receiver=users.user, room=users.room)
                     instance.save()
                     instance2 = NewMessage(message=instance)
                     instance2.save()
@@ -174,6 +174,8 @@ class MessageView(View):
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = FilterForm(request.POST)
+            print (request.POST.get("sdate", ""))
+            datee = (request.POST.get("sdate", "")).split("-")
             # check whether it's valid:
             if form.is_valid():
                 # process the data in form.cleaned_data as required
@@ -189,17 +191,27 @@ class MessageView(View):
                     messages = Message.objects.filter(room__contains=str(text))
                 else:
                     if str(date) == "year":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        startdate=timezone.today()
+                        enddate = timezone.today().replace(year=timezone.today().year-1)
+                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "6month":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        startdate = timezone.today()
+                        enddate = timezone.today().replace(month=timezone.today().month - 6)
+                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "month":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        startdate = timezone.today()
+                        enddate = timezone.today().replace(month=timezone.today().month - 1)
+                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "week":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        startdate = timezone.now().today()
+                        enddate = timezone.now().today().replace(day=timezone.now().today().day - 7)
+                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "today":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        startdate = timezone.now().today()
+                        enddate = timezone.now().today().replace(hour=0)
+                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
                     if str(date) == "specific_date":
-                        messages = Message.objects.raw('SELECT * FROM rooms_message')
+                        messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1], created_at__day=datee[2])
                 context = {
                     'username': request.user.username,
                     'is_admin': request.user.is_staff,
