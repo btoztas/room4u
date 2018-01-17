@@ -136,8 +136,10 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
-
-SITE_URL = 'http://127.0.0.1:8000'
+if 'RDS_DB_NAME' in os.environ:
+    SITE_URL = 'http://room4u-mysql-env.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+else:
+    SITE_URL = 'http://127.0.0.1:8000'
 
 LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
