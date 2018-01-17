@@ -50,8 +50,3 @@ class Visit(models.Model):
 
 class NewMessage(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='message')
-
-
-class UserProfile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    full_name = models.CharField(max_length=300)
