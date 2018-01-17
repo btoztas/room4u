@@ -105,14 +105,14 @@ $("#newmessage").submit(function (event) {
 });
 
 function newMessageForm(destination) {
-    document.getElementById("destination").value=destination;
-    document.getElementById("destflag").value="room";
+    document.getElementById("destination").value = destination;
+    document.getElementById("destflag").value = "room";
     $('#messageModal').modal('show');
 }
 
 function newMessageForm2(destination) {
-    document.getElementById("destination").value=destination;
-    document.getElementById("destflag").value="user";
+    document.getElementById("destination").value = destination;
+    document.getElementById("destflag").value = "user";
     $('#messageModal').modal('show');
 }
 
