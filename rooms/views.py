@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
+from room4u.settings import SITE_URL
 from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
 from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
@@ -17,14 +18,14 @@ from django.contrib.auth.models import User
 if 'RDS_DB_NAME' in os.environ:
 
     config = fenixedu.FenixEduConfiguration \
-        ('1132965128044595', 'http://room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com/room4u/auth',
+        ('1132965128044595', SITE_URL+'/room4u/auth',
          '3BjrjgA8DEYSQ545ozu/usJ4QjeTLTsWFOrDceUmNHprUVYGDnOHhfml2wI+W9CUwviQ5vP5OvKoFTbVtkdRgg==',
          'https://fenix.tecnico.ulisboa.pt/')
 
 else:
 
     config = fenixedu.FenixEduConfiguration \
-        ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
+        ('1977390058176548', SITE_URL+'/room4u/auth',
          'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
          'https://fenix.tecnico.ulisboa.pt/')
 
