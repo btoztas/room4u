@@ -19,11 +19,21 @@
 </head>
 
 <body class="bg-dark">
-<div class="container">
+<div align="center" style=" position: absolute; margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 500px;
+  height: 150px;
+  background-color: #ccc;
+  border-radius: 3px;">
     <div class="main_title">
         <h1 class="main_title"> Welcome to room4u</h1>
-        <h2> Please login using the Fenix platform.</h2>
-        <p><a href="{{ auth_url }}">Login</a></p>
+        <h4> Please login using the Fenix platform.</h4>
+            <button class="btn btn-primary"
+                    onclick="location.href = '{{ auth_url }}'" type="button"><i class="fa fa-sign-in" aria-hidden="true"></i> Login
+            </button>
     </div>
 </div>
 <!-- Bootstrap core JavaScript-->
