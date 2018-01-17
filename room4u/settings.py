@@ -135,7 +135,7 @@ AUTHENTICATION_BACKENDS = [
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
 if 'RDS_DB_NAME' in os.environ:
-    SITE_URL = 'http://room4u-mysql-env.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+    SITE_URL = 'http://room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 

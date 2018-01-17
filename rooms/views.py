@@ -17,7 +17,7 @@ from django.contrib.auth.models import User
 if 'RDS_DB_NAME' in os.environ:
 
     config = fenixedu.FenixEduConfiguration \
-        ('1132965128044595', 'http://room4u-mysql-env.xrjug35ebn.eu-west-1.elasticbeanstalk.com/room4u/auth',
+        ('1132965128044595', 'http://room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com/room4u/auth',
          '3BjrjgA8DEYSQ545ozu/usJ4QjeTLTsWFOrDceUmNHprUVYGDnOHhfml2wI+W9CUwviQ5vP5OvKoFTbVtkdRgg==',
          'https://fenix.tecnico.ulisboa.pt/')
 
