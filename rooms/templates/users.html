@@ -17,9 +17,9 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="id_username">Enter a user</label>
+                    <label for="id_username">Enter an username, first name or last name</label>
                     <input class="form-control" id="id_username" type="text" name="keyword"
-                           placeholder="Example: istXXXXXX">
+                           placeholder="Example: istXXXXXX or João">
                 </div>
                 <button class="btn btn-primary btn-block" type="submit">Search User</button>
             </form>
