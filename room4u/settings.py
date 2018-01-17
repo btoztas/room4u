@@ -25,7 +25,7 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'room4u-mysql-env.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
+    'room4u-prod.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
     '127.0.0.1',
 ]
 
