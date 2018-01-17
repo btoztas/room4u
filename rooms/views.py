@@ -565,7 +565,7 @@ class UsersView(View):
             # Search for rooms in the db
             context['users'] = User.objects.filter(Q(username__contains=keyword) |
                                                    Q(first_name__contains=keyword) |
-                                                   Q(last_name__contains=keyword))\
+                                                   Q(last_name__contains=keyword)) \
                 .exclude(is_staff=True).all()
 
         return render(request, self.template, context)
