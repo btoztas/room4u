@@ -520,11 +520,21 @@ class RoomView(View):
         return context
 
     def get(self, request, *args, **kwargs):
+
         context = self.get_context(request)
 
         room_id = kwargs['room_id']
 
         context['room'] = Room.objects.filter(id=room_id).first()
+
+        # Getting room family
+        context['room_family'] = []
+        parent = context['room'].parent_id
+
+        while parent:
+
+
+        return HttpResponse(context['room'].parent_id.parent_id.parent_id.parent_id.parent_id)
 
         context['all_visits'] = Visit.objects.filter(room=context['room']).order_by('-start').all()
         context['all_visits_total'] = len(context['all_visits'])
