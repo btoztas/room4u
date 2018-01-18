@@ -16,7 +16,6 @@
     <link href="{% static 'bootstrap/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template-->
     <link href="{% static 'bootstrap/css/sb-admin.css' %}" rel="stylesheet">
-    <script src="{% static 'js/functions.js' %}"></script>
 </head>
 
 <body class="fixed-nav sticky-footer bg-dark" id="page-top">
@@ -139,7 +138,7 @@
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form id = "newmessage" action="/room4u/messages/handler" method="post">
+                <form id="newmessage" action="/room4u/messages/handler" method="post">
                     {% csrf_token %}
                     <input type="hidden" id="destination" name ="destination" value="o">
                     <input type="hidden" id="destflag" name ="destflag" value="o">
@@ -156,7 +155,7 @@
                     <div class="modal-footer">
                         <input type="submit" value="Send">
                     </div>
-                  </form>
+                </form>
                 <!--<div class="modal-footer">
                     <button id = "but1" onClick="window.location.reload()" class="btn btn-primary" type="button"
                             data-dismiss="modal">Send
@@ -185,6 +184,7 @@
     <script src="{% static 'bootstrap/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
     <!-- Custom scripts for all pages-->
     <script src="{% static 'bootstrap/js/sb-admin.min.js' %}"></script>
+    <script src="{% static 'js/functions.js' %}"></script>
     {% block scripts %}
     {% endblock %}
 </div>

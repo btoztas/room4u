@@ -87,7 +87,9 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-user"></i>
-                                    <b> {{ user.user.first_name }} {{ user.user.last_name }} - {{ user.user.username }}</b> | <i class="fa fa-map-pin"></i> {{ user.room.name }}
+                                    <b> {{ user.user.first_name }} {{ user.user.last_name }}
+                                        - {{ user.user.username }}</b> | <i
+                                        class="fa fa-map-pin"></i> {{ user.room.hierarchy }}/{{ user.room.name }}
                                 </td>
                                 <td width="10%">
 
@@ -117,7 +119,7 @@
                             <tr width="100%">
                                 <td width="99%">
                                     <i class="fa fa-map-pin"></i>
-                                    <b>{{ room.name }}</b> -
+                                    {{ room.hierarchy }}/{{ room.name }} -
                                     {{ room.total }} Check-in{% if room.total > 1 %}s{% endif %}
                                 </td>
                                 <td width="10%">
@@ -237,7 +239,9 @@
                             <tbody>
                             {% for room in rooms %}
                                 <tr>
-                                    <td width="80%">{{ room.name }}</td>
+                                    <td width="80%">
+                                        <font color="DimGray">{{ room.hierarchy }}/</font>{{ room.name }}
+                                    </td>
 
                                     <td width="10%">
                                         <button class="btn btn-primary btn-block" type="submit"

@@ -1,4 +1,4 @@
-import requests
+import os
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -8,16 +8,26 @@ from django.utils.decorators import method_decorator
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
+from room4u.settings import SITE_URL
 from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
 from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
 
-config = fenixedu.FenixEduConfiguration \
-    ('1977390058176548', 'http://127.0.0.1:8000/room4u/auth',
-     'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
-     'https://fenix.tecnico.ulisboa.pt/')
+if 'RDS_DB_NAME' in os.environ:
+
+    config = fenixedu.FenixEduConfiguration \
+        ('1132965128044595', SITE_URL + '/room4u/auth',
+         '3BjrjgA8DEYSQ545ozu/usJ4QjeTLTsWFOrDceUmNHprUVYGDnOHhfml2wI+W9CUwviQ5vP5OvKoFTbVtkdRgg==',
+         'https://fenix.tecnico.ulisboa.pt/')
+
+else:
+
+    config = fenixedu.FenixEduConfiguration \
+        ('1977390058176548', SITE_URL + '/room4u/auth',
+         'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
+         'https://fenix.tecnico.ulisboa.pt/')
 
 client = fenixedu.FenixEduClient(config)
 
@@ -252,33 +262,7 @@ class MessageView(View):
 
 
 class ApiView(View):
-    base_url = 'https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/'
-
-    def retrieve_space(self, space_parent, space_to_explore):
-
-        # Request space's info
-        r = requests.get(self.base_url + space_to_explore)
-        space_info = r.json()
-
-        # Create new space object with the info retrieved
-        new_space = Room(id=space_info['id'], parent_id=space_parent, name=space_info['name'])
-        new_space.save()
-
-        # Explore other contained spaces within this space
-        for contained_space in space_info['containedSpaces']:
-            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=space_info['id'])
-
     def get(self, request, *args, **kwargs):
-
-        # Request space's info - this will be the campuses (roots of the tree)
-        r = requests.get(self.base_url)
-        campuses = r.json()
-
-        # Explore spaces contained within the campus
-        for campus_index in range(0, len(campuses)):
-            campus_id = campuses[campus_index]['id']
-            self.retrieve_space(space_to_explore=campus_id, space_parent=0)
-
         return HttpResponse("done")
 
 
@@ -319,6 +303,7 @@ class CheckInView(View):
             for room in context['rooms']:
                 room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
+                room['hierarchy'] = room['users'][0].room.hierarchy
                 context['total'] += room['total']
 
         return render(request, self.template, context)
@@ -348,25 +333,21 @@ class CheckInView(View):
                             .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).order_by(
                             '-start').all()
                         room['name'] = room['users'][0].room.name
+                        room['hierarchy'] = room['users'][0].room.hierarchy
 
                         context['total'] += room['total']
 
                 elif search_type == 'username':
                     context['users'] = Visit.objects.filter(end__isnull=True, user__username__contains=search_keyword) \
-                        .all()
+                        .exclude(user__is_staff=True).all()
                     context['total'] = len(context['users'])
 
                 elif search_type == 'name':
 
-                    context['users'] = Visit.objects.filter(Q(user__first_name__contains=search_keyword) |
-                                                            Q(user__last_name__contains=search_keyword)) \
-                        .exclude(user__is_staff=True).values('user').annotate(total=Count('user_id')).order_by('-total')
-
-                    for user in context['users']:
-                        user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
-                        user['username'] = user['visits'][0].user.username
-                        user['last_name'] = user['visits'][0].user.last_name
-                        user['first_name'] = user['visits'][0].user.first_name
+                    context['users'] = Visit.objects.filter(Q(end__isnull=True),
+                                                            Q(user__first_name__contains=search_keyword) |
+                                                            Q(user__last_name__contains=search_keyword)).exclude(
+                        user__is_staff=True).all()
 
                     context['total'] = len(context['users'])
 
@@ -459,6 +440,7 @@ class CheckInHistoryView(View):
             for room in context['rooms']:
                 room['users'] = Visit.objects.filter(room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
+                room['hierarchy'] = room['users'][0].room.hierarchy
                 context['total'] += room['total']
 
         else:
@@ -490,6 +472,7 @@ class CheckInHistoryView(View):
                         room['users'] = Visit.objects \
                             .filter(room__name__contains=search_keyword, room=room['room']).order_by('-start').all()
                         room['name'] = room['users'][0].room.name
+                        room['hierarchy'] = room['users'][0].room.hierarchy
 
                         context['total'] += room['total']
 
@@ -576,6 +559,18 @@ class RoomView(View):
 
         context['room'] = Room.objects.filter(id=room_id).first()
 
+        # Getting room family
+        context['room_family'] = []
+        parent = context['room'].parent_id
+
+        while parent:
+            context['room_family'].append({
+                'name': parent.name,
+                'id': parent.id
+            })
+            parent = parent.parent_id
+        context['room_family'].reverse()
+
         context['all_visits'] = Visit.objects.filter(room=context['room']).order_by('-start').all()
         context['all_visits_total'] = len(context['all_visits'])
 
@@ -614,7 +609,7 @@ class UsersView(View):
             # Search for rooms in the db
             context['users'] = User.objects.filter(Q(username__contains=keyword) |
                                                    Q(first_name__contains=keyword) |
-                                                   Q(last_name__contains=keyword))\
+                                                   Q(last_name__contains=keyword)) \
                 .exclude(is_staff=True).all()
 
         return render(request, self.template, context)

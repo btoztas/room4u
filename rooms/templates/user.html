@@ -32,10 +32,11 @@
         </div>
         <div class="card-body ">
             {% if checked_in %}
-                <div style="padding-bottom: inherit">Currently checked in on {{ checked_in.room.name }},
+                <div style="padding-bottom: inherit">Currently checked in on <a href="/room4u/rooms/{{ checked_in.room.id }}">
+                    {{ checked_in.room.hierarchy }}/{{ checked_in.room.name }}</a>,
                     since {{ checked_in.start }}</div>
             {% else %}
-                <div style="padding-bottom: inherit">Currently checked in.</div>
+                <div style="padding-bottom: inherit">Currently not checked in.</div>
             {% endif %}
         </div>
     </div>
