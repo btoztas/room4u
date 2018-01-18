@@ -131,7 +131,10 @@ class NewMessageHandlerView(View):
                     instance.save()
                     instance2 = NewMessage(message=instance)
                     instance2.save()
+                print("ola")
                 return HttpResponse(status=200)
+            else:
+                return HttpResponse(status=204)
 
     def get(self, request, *args, **kwargs):
         return redirect('/room4u')
@@ -143,7 +146,7 @@ class MessageView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        if request.user.username == "administrator":
+        if request.user.is_staff:
             messages = Message.objects.all()
         else:
             messages = Message.objects.filter(receiver=request.user)
@@ -164,7 +167,6 @@ class MessageView(View):
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = FilterForm(request.POST)
-            print (request.POST.get("sdate", ""))
             datee = (request.POST.get("sdate", "")).split("-")
             # check whether it's valid:
             if form.is_valid():
@@ -175,33 +177,66 @@ class MessageView(View):
                 date = request.POST.get("date", "")
                 sdate = request.POST.get("sdate", "")
                 if str(filter) == "Search":
-                    messages = Message.objects.filter(text__contains=str(text))
-                    messages = messages | Message.objects.filter(title__contains=str(text))
+                    if request.user.is_staff:
+                        messages = Message.objects.filter(text__contains=str(text))
+                        messages = messages | Message.objects.filter(title__contains=str(text))
+                    else:
+                        messages = Message.objects.filter(text__contains=str(text), receiver=request.user)
+                        messages = messages | Message.objects.filter(title__contains=str(text))
                 elif str(filter) == "Room":
-                    messages = Message.objects.filter(room__contains=str(text))
+                    if request.user.is_staff:
+                        messages = Message.objects.filter(room__name__contains=str(text))
+                    else:
+                        messages = Message.objects.filter(room__name__contains=str(text), receiver=request.user)
                 else:
                     if str(date) == "year":
-                        startdate=timezone.today()
-                        enddate = timezone.today().replace(year=timezone.today().year-1)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate=timezone.now().today()
+                        enddate = timezone.now().today().replace(year=timezone.now().today().year-1)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "6month":
-                        startdate = timezone.today()
-                        enddate = timezone.today().replace(month=timezone.today().month - 6)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now().today()
+                        if(timezone.now().today().month - 6>0):
+                            enddate = timezone.now().today().replace(month=timezone.now().today().month - 6)
+                        else:
+                            enddate = timezone.now().today().replace(month=12 + timezone.now().today().month - 6, year=timezone.now().today().year-1)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "month":
-                        startdate = timezone.today()
-                        enddate = timezone.today().replace(month=timezone.today().month - 1)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now().today()
+                        if (timezone.now().today().month - 1 > 0):
+                            enddate = timezone.now().today().replace(month=timezone.now().today().month - 1)
+                        else:
+                            enddate = timezone.now().today().replace(month=12, year=timezone.now().today().year-1)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "week":
                         startdate = timezone.now().today()
                         enddate = timezone.now().today().replace(day=timezone.now().today().day - 7)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "today":
                         startdate = timezone.now().today()
                         enddate = timezone.now().today().replace(hour=0)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "specific_date":
-                        messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1], created_at__day=datee[2])
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
+                                                              created_at__day=datee[2])
+                        else:
+                            messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
+                                                              created_at__day=datee[2], receiver=request.user)
                 context = {
                     'username': request.user.username,
                     'is_admin': request.user.is_staff,
@@ -212,6 +247,8 @@ class MessageView(View):
                     'messages': messages
                 }
                 return render(request, self.message_template, context)
+            else:
+                return redirect('/room4u/messages')
 
 
 class ApiView(View):
