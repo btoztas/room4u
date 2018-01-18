@@ -267,7 +267,7 @@ class CheckInView(View):
             for room in context['rooms']:
                 room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
-                room['hierarchy'] = room['hierarchy'][0].room.name
+                room['hierarchy'] = room['users'][0].room.hierarchy
                 context['total'] += room['total']
 
         return render(request, self.template, context)
@@ -297,6 +297,7 @@ class CheckInView(View):
                             .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).order_by(
                             '-start').all()
                         room['name'] = room['users'][0].room.name
+                        room['hierarchy'] = room['users'][0].room.hierarchy
 
                         context['total'] += room['total']
 
