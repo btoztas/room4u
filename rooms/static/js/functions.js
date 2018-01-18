@@ -59,12 +59,12 @@ $("#newmessage").submit(function(event) {
 
 
     /* stop form from submitting normally */
+    //$('#alertModal').modal('show');
     event.preventDefault();
-    $('#messageModal').modal('hide');
 
     /* get the action attribute from the <form action=""> element */
     var $form = $(  this );//, url = $form.attr( 'action' );
-    var url = "/room4u/messages/handler"
+    var url = "/room4u/messages/handler";
     var http = new XMLHttpRequest();
     var subject = $('#subject').val();
     var message = $('#message').val();
@@ -80,21 +80,26 @@ $("#newmessage").submit(function(event) {
      });*/
     http.open("POST", url, true);
     http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
     http.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            replace('alertModalLabel', "New Message");
-            replace('but', "Return To Messages");
-            document.getElementById('but').onclick = function(){
-                window.location.href = "/room4u/messages";
+        if (this.responseText=="sm"){
+            replace('messageModalLabel', "Message must have subject and body");
+            $('#messageModal').modal('show');
+        }else {
+            if (this.readyState == 4) {
+                replace('alertModalLabel', "New Message");
+                replace('but', "Return To Messages");
+                document.getElementById('but').onclick = function () {
+                    window.location.href = "/room4u/messages";
+                }
+                if (this.status == 200){
+                    $('#messageModal').modal('hide');
+                    replace('alertModalText', "Message sent");
+                } else {
+                    $('#messageModal').modal('hide');
+                    replace('alertModalText', "Could not send the message. Try again later");
+                }
+                $('#alertModal').modal('show');
             }
-
-            if (this.status == 200) {
-                replace('alertModalText', "Message sent");
-            }else{
-                replace('alertModalText', "Could not send the message. Try again later");
-            }
-            $('#alertModal').modal('show');
         }
     };
     http.send(params);
@@ -104,12 +109,14 @@ $("#newmessage").submit(function(event) {
 function newMessageForm(destination) {
     document.getElementById("destination").value = destination;
     document.getElementById("destflag").value = "room";
+    replace('messageModalLabel', "New Message");
     $('#messageModal').modal('show');
 }
 
 function newMessageForm2(destination) {
     document.getElementById("destination").value = destination;
     document.getElementById("destflag").value = "user";
+    replace('messageModalLabel', "New Message");
     $('#messageModal').modal('show');
 }
 

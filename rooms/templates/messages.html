@@ -6,46 +6,48 @@
             <a href="/room4u">room4u</a>
         </li>
         <li class="breadcrumb-item active">Messages</li>
-    </ol><br>
+    </ol>
 
-    <br><br><br>
-    <div class="card-body ">
+
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
-
+        <div class="form-group ">
         <input type="hidden" name="filter" value="Search">
         <input type="hidden" name="date" value="date">
         <input type="hidden" name="sdate" value="sdate">
 
         <!--<label for="keyword">Search Keyword</label><br>-->
-        <input type="text" id="text" name="text" placeholder="Write keyword...">
+        <input class="form-control" type="text" id="text" name="text" placeholder="Write keyword...">
 
-        <input type="submit" class="btn btn-info" value="Search" style="width:133px"><br><br>
+        <!--<input type="submit" class="btn btn-info" value="Search" style="width:133px"><br><br>-->
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Search</button><br><br>
 
     </form>
-
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
-
+        <div class="form-group ">
         <input type="hidden" name="filter" value="Room">
 
         <!--<label for="room">Filter by Room</label><br>-->
         <input type="hidden" name="date" value="date">
         <input type="hidden" name="sdate" value="sdate">
-        <input type="text" id="text" name="text" placeholder="Search in room...">
-
-        <input type="submit" class="btn btn-info" value="Filter by Room"><br><br>
+        <input class = "form-control" type="text" id="text" name="text" placeholder="Search in room...">
+        </div>
+        <!--<input type="submit" class="btn btn-info" value="Filter by Room"><br><br>-->
+        <button class="btn btn-primary btn-block" type="submit">Filter by Room</button><br><br>
 
     </form>
 
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
+        <div class="form-group ">
         <input type="hidden" name="filter" value="Date">
 
         <input type="hidden" name="text" value="text">
 
         <!--<label for="date">Filter by Date</label><br>-->
-        <select name="date" id="date" style="width:210px" onchange="specificDate()">
+        <select class = "form-control" name="date" id="date" onchange="specificDate()">
             <option value="year" selected>Last year</option>
             <option value="6month">Last 6 months</option>
             <option value="month">Last month</option>
@@ -53,17 +55,20 @@
             <option value="today">Today</option>
             <option value="specific_date">Specific Date</option>
         </select>
-
+        </div>
+        <div class="form-group ">
         <input type="hidden" id="sdate" name="sdate" placeholder="Search specific date..." value="sdate">
+        </div>
 
-        <input type="submit" class="btn btn-info" value="Filter by Date" style="width:135px"><br><br><br>
+        <!--<input type="submit" class="btn btn-info" value="Filter by Date" style="width:135px"><br><br>-->
+
+        <button class="btn btn-primary btn-block" type="submit">Filter by Date</button><br><br>
 
         <a href="/room4u/messages">
                 <i class="fa fa-angle-double-left" aria-hidden="true"></i> Back
             </a>
 
     </form>
-    </div>
     <div class="card mb-3">
         <div class="card-header">
             <i class="fa fa-table"></i> Registo de Mensagens
@@ -102,10 +107,10 @@
         function specificDate() {
             var text = document.getElementById("date").value;
             if (text.toString() == "specific_date") {
-                document.getElementById("sdate").outerHTML = "<input type =\"date\" id = \"sdate\" name=\"sdate\" class=\"form-control\" style=\"width: 250px\">";
+                document.getElementById("sdate").outerHTML = "<input type =\"date\" id = \"sdate\" name=\"sdate\" class=\"form-control\">";
                 //<p>Date: <input type="text" id="datepicker"></p>
             } else {
-                document.getElementById("sdate").outerHTML = "<input type =\"hidden\" id = \"sdate\" name=\"sdate\" class=\"form-control\" style=\"width: 250px\">";
+                document.getElementById("sdate").outerHTML = "<input type =\"hidden\" id = \"sdate\" name=\"sdate\" class=\"form-control\">";
                 document.getElementById("sdate").value = "text";
             }
         }

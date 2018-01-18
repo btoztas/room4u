@@ -141,10 +141,9 @@ class NewMessageHandlerView(View):
                     instance.save()
                     instance2 = NewMessage(message=instance)
                     instance2.save()
-                print("ola")
                 return HttpResponse(status=200)
             else:
-                return HttpResponse(status=204)
+                return HttpResponse("sm")
 
     def get(self, request, *args, **kwargs):
         return redirect('/room4u')

@@ -145,16 +145,19 @@
                     <div class = "card-body">
                     <label for="subject">Subject</label><br>
                     <!--<div class = "card-body">-->
-                    <input type="text" id="subject" name="subject" placeholder="Message subject..."><br>
+                    <input class = "form-control" type="text" id="subject" name="subject" placeholder="Message subject..."><br>
                     <!--</div>-->
                     <label for="message">Message</label><br>
                     <!--<div class = "card-body">-->
-                    <textarea id="message" name="message" placeholder="Write your Message..." style="height:200px"></textarea>
+                    <textarea class = "form-control" id="message" name="message" placeholder="Write your Message..." style="height:200px"></textarea>
                     </div>
                     <br>
                     <div class="modal-footer">
-                        <input type="submit" value="Send">
+                        <!--<input type="submit" value="Send">-->
+                        <button class="btn btn-primary" type="submit">Send
+                    </button>
                     </div>
+
                 </form>
                 <!--<div class="modal-footer">
                     <button id = "but1" onClick="window.location.reload()" class="btn btn-primary" type="button"
