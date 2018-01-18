@@ -18,14 +18,14 @@ from django.contrib.auth.models import User
 if 'RDS_DB_NAME' in os.environ:
 
     config = fenixedu.FenixEduConfiguration \
-        ('1132965128044595', SITE_URL+'/room4u/auth',
+        ('1132965128044595', SITE_URL + '/room4u/auth',
          '3BjrjgA8DEYSQ545ozu/usJ4QjeTLTsWFOrDceUmNHprUVYGDnOHhfml2wI+W9CUwviQ5vP5OvKoFTbVtkdRgg==',
          'https://fenix.tecnico.ulisboa.pt/')
 
 else:
 
     config = fenixedu.FenixEduConfiguration \
-        ('1977390058176548', SITE_URL+'/room4u/auth',
+        ('1977390058176548', SITE_URL + '/room4u/auth',
          'ivhTjk4+geVbJT1bh+KtZ0zrcBo0RuMw/SFsQIxShsRJX7VSntrKVw3U82Yz2WQb7075DbsnQX6+/uUO+LG7Kw==',
          'https://fenix.tecnico.ulisboa.pt/')
 
@@ -226,9 +226,7 @@ class MessageView(View):
 
 
 class ApiView(View):
-
     def get(self, request, *args, **kwargs):
-    
         return HttpResponse("done")
 
 
@@ -269,6 +267,7 @@ class CheckInView(View):
             for room in context['rooms']:
                 room['users'] = Visit.objects.filter(end__isnull=True, room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
+                room['hierarchy'] = room['users'][0].room.hierarchy
                 context['total'] += room['total']
 
         return render(request, self.template, context)
@@ -298,25 +297,21 @@ class CheckInView(View):
                             .filter(room__name__contains=search_keyword, end__isnull=True, room=room['room']).order_by(
                             '-start').all()
                         room['name'] = room['users'][0].room.name
+                        room['hierarchy'] = room['users'][0].room.hierarchy
 
                         context['total'] += room['total']
 
                 elif search_type == 'username':
                     context['users'] = Visit.objects.filter(end__isnull=True, user__username__contains=search_keyword) \
-                        .all()
+                        .exclude(user__is_staff=True).all()
                     context['total'] = len(context['users'])
 
                 elif search_type == 'name':
 
-                    context['users'] = Visit.objects.filter(Q(user__first_name__contains=search_keyword) |
-                                                            Q(user__last_name__contains=search_keyword)) \
-                        .exclude(user__is_staff=True).values('user').annotate(total=Count('user_id')).order_by('-total')
-
-                    for user in context['users']:
-                        user['visits'] = Visit.objects.filter(user=user['user']).order_by('-start').all()[:5]
-                        user['username'] = user['visits'][0].user.username
-                        user['last_name'] = user['visits'][0].user.last_name
-                        user['first_name'] = user['visits'][0].user.first_name
+                    context['users'] = Visit.objects.filter(Q(end__isnull=True),
+                                                            Q(user__first_name__contains=search_keyword) |
+                                                            Q(user__last_name__contains=search_keyword)).exclude(
+                        user__is_staff=True).all()
 
                     context['total'] = len(context['users'])
 
@@ -409,6 +404,7 @@ class CheckInHistoryView(View):
             for room in context['rooms']:
                 room['users'] = Visit.objects.filter(room=room['room']).order_by('-start').all()
                 room['name'] = room['users'][0].room.name
+                room['hierarchy'] = room['users'][0].room.hierarchy
                 context['total'] += room['total']
 
         else:
@@ -440,6 +436,7 @@ class CheckInHistoryView(View):
                         room['users'] = Visit.objects \
                             .filter(room__name__contains=search_keyword, room=room['room']).order_by('-start').all()
                         room['name'] = room['users'][0].room.name
+                        room['hierarchy'] = room['users'][0].room.hierarchy
 
                         context['total'] += room['total']
 
@@ -525,6 +522,18 @@ class RoomView(View):
         room_id = kwargs['room_id']
 
         context['room'] = Room.objects.filter(id=room_id).first()
+
+        # Getting room family
+        context['room_family'] = []
+        parent = context['room'].parent_id
+
+        while parent:
+            context['room_family'].append({
+                'name': parent.name,
+                'id': parent.id
+            })
+            parent = parent.parent_id
+        context['room_family'].reverse()
 
         context['all_visits'] = Visit.objects.filter(room=context['room']).order_by('-start').all()
         context['all_visits_total'] = len(context['all_visits'])

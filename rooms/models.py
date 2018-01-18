@@ -6,7 +6,8 @@ from django.utils import timezone
 class Room(models.Model):
     id = models.CharField(primary_key=True, editable=False, max_length=32)
     parent_id = models.ForeignKey("self", on_delete=models.CASCADE, related_name='parent', blank=True, null=True)
-    name = models.CharField(max_length=15)
+    hierarchy = models.CharField(max_length=500)
+    name = models.CharField(max_length=50)
     created_at = models.DateTimeField(editable=False)
     modified_at = models.DateTimeField()
 
