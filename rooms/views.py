@@ -1,3 +1,4 @@
+import json
 import os
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -64,6 +65,8 @@ class IndexView(View):
             else:
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
+                context['user_id'] = request.user.id
+                context['checked_in_room_id'] = current_check_in.room.id
                 context['checked_in_time'] = current_check_in.start
                 context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
                     '-start').all()
@@ -238,7 +241,8 @@ class CheckInView(View):
 
         context = {
             'username': request.user.username,
-            'is_admin': request.user.is_staff
+            'is_admin': request.user.is_staff,
+            'user_id': request.user.id
         }
 
         if not request.user.is_staff:
@@ -250,6 +254,8 @@ class CheckInView(View):
             else:
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
+                context['user_id'] = request.user.id
+                context['checked_in_room_id'] = current_check_in.room.id
                 context['checked_in_time'] = current_check_in.start
                 context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
                     '-start').all()
@@ -387,6 +393,8 @@ class CheckInHistoryView(View):
             else:
                 context['checked_in'] = 1
                 context['checked_in_room'] = current_check_in.room.name
+                context['user_id'] = request.user.id
+                context['checked_in_room_id'] = current_check_in.room.id
                 context['checked_in_time'] = current_check_in.start
                 context['users_in_room'] = Visit.objects.filter(room=current_check_in.room, end__isnull=True).order_by(
                     '-start').all()
@@ -604,3 +612,170 @@ class UserView(View):
         context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)
+
+
+class VisitApiView(View):
+    def get(self, request, *args, **kwargs):
+
+        if 'visit_id' in kwargs:
+            visit_id = kwargs['visit_id']
+
+            try:
+                visit = Visit.objects.filter(id=visit_id).get()
+
+            except Visit.DoesNotExist:
+                response = dict()
+                response['error'] = 'resource not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+        else:
+            visits = Visit.objects.all()
+
+            if visits:
+                return HttpResponse(
+                    serialize("json", visits),
+                    content_type='application/json',
+                    status=200
+                )
+
+        response = dict()
+        response['error'] = 'bad request'
+        return HttpResponse(
+            json.dumps(response),
+            content_type='application/json',
+            status=400
+        )
+
+    def post(self, request, *args, **kwargs):
+
+        body = json.loads(request.body)
+
+        if 'user' in body and 'room' in body:
+
+            try:
+                user = User.objects.get(id=body['user'])
+                room = Room.objects.get(id=body['room'])
+            except (User.DoesNotExist, Room.DoesNotExist):
+
+                response = dict()
+                response['error'] = 'room or user not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+            # Checking if there is a pending visit
+            current_check_in = Visit.objects.filter(user=user, end__isnull=True).first()
+
+            if current_check_in:
+                if current_check_in.room == room:
+                    response = dict()
+                    response['error'] = 'already checked-in in that room'
+                    return HttpResponse(
+                        json.dumps(response),
+                        content_type='application/json',
+                        status=409
+                    )
+                else:
+                    current_check_in.end = timezone.now()
+                    current_check_in.save()
+
+            start = timezone.now()
+
+            visit = Visit(user=user, room=room, start=start)
+            visit.save()
+
+            return HttpResponse(
+                serialize("json", [visit]),
+                status=200,
+                content_type='application/json',
+            )
+
+        response = dict()
+        response['error'] = 'bad request, room or user missing'
+        return HttpResponse(
+            json.dumps(response),
+            content_type='application/json',
+            status=400
+        )
+
+    def put(self, request, *args, **kwargs):
+
+        body = json.loads(request.body)
+
+        if 'user' in body and 'room' in body:
+
+            try:
+                user = User.objects.get(id=body['user'])
+                room = Room.objects.get(id=body['room'])
+            except (User.DoesNotExist, Room.DoesNotExist):
+
+                response = dict()
+                response['error'] = 'room or user not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+            # Checking if there is a pending visit
+            current_check_in = Visit.objects.filter(user=user, end__isnull=True).first()
+
+            if not current_check_in:
+                response = dict()
+                response['error'] = 'there is no pending visits'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=409
+                )
+
+            current_check_in.end = timezone.now()
+            current_check_in.save()
+
+            return HttpResponse(
+                serialize("json", [current_check_in]),
+                status=200,
+                content_type='application/json',
+            )
+
+        response = dict()
+        response['error'] = 'bad request, room or user missing'
+        return HttpResponse(
+            json.dumps(response),
+            content_type='application/json',
+            status=400
+        )
+
+    def delete(self, request, *args, **kwargs):
+
+        if 'visit_id' in kwargs:
+            visit_id = kwargs['visit_id']
+
+            try:
+                visit = Visit.objects.filter(id=visit_id).get()
+                visit.delete()
+                return HttpResponse(
+                    status=204
+                )
+
+            except Visit.DoesNotExist:
+                response = dict()
+                response['error'] = 'resource not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+        response = dict()
+        response['error'] = 'not allowed'
+        return HttpResponse(
+            json.dumps(response),
+            content_type='application/json',
+            status=405
+        )
