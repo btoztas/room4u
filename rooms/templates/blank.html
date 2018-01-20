@@ -142,6 +142,7 @@
                     {% csrf_token %}
                     <input type="hidden" id="destination" name ="destination" value="o">
                     <input type="hidden" id="destflag" name ="destflag" value="o">
+                    <input type="hidden" id="sender" name ="sender" value="{{ request.user.id }}">
                     <div class = "card-body">
                     <label for="subject">Subject</label><br>
                     <!--<div class = "card-body">-->

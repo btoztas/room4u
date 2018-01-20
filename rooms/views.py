@@ -14,6 +14,7 @@ from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
+import json
 
 if 'RDS_DB_NAME' in os.environ:
 
@@ -263,6 +264,113 @@ class MessageView(View):
 class ApiView(View):
     def get(self, request, *args, **kwargs):
         return HttpResponse("done")
+
+class RoomsApiView(View):
+
+    def get(self, request, **kwargs):
+        if 'room_id' in kwargs:
+            if 'search' in kwargs:
+                if kwargs['search'] == "visits":
+                    visits = Visit.objects.filter(room=kwargs['room_id'])
+                    response = serialize("json", visits)
+                    return HttpResponse(response, content_type='application/json')
+                if kwargs['search'] == "messages":
+                    messages = Message.objects.filter(room=kwargs['room_id'])
+                    response = serialize("json", messages)
+                    return HttpResponse(response, content_type='application/json')
+            else:
+                rooms = Room.objects.filter(id=kwargs['room_id'])
+                response = serialize("json", rooms)
+                return HttpResponse(response, content_type='application/json')
+        else:
+            if request.method == 'GET':
+                rooms = Room.objects.all()
+                response = serialize("json", rooms)
+                return HttpResponse(response, content_type='application/json')
+
+class MessagesApiView(View):
+
+    def get(self, request, **kwargs):
+        if 'message_id' in kwargs:
+            messages = Message.objects.filter(id=kwargs['message_id'])
+            response = serialize("json", messages)
+            return HttpResponse(response, content_type='application/json')
+        else:
+            if request.method == 'GET':
+                messages = Message.objects.all()
+                response = serialize("json", messages)
+                return HttpResponse(response, content_type='application/json')
+    def post(self, request):
+        body = json.loads(request.body)
+        if 'subject' in body and 'message' in body and 'sender' in body:
+            if body['subject']=="" or body['message']=="":
+                response = dict()
+                response['error'] = 'bad request, subject or body empty'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=400
+                )
+            else:
+                if 'room' in body:
+                    destination = Room.objects.filter(id=body['room'])
+                    if not destination:
+                        response = dict()
+                        response['error'] = 'room not found'
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=404
+                        )
+                    else:
+                        users = Visit.objects.filter(room=destination, end__isnull=True)
+                        for user in users:
+                            instance = Message(title=str(body['subject']),
+                                               text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
+                                               receiver=user.user, room=user.room)
+                            instance.save()
+                            instance2 = NewMessage(message=instance)
+                            instance2.save()
+                        response = serialize("json", [Message(title=str(body['subject']),
+                                               text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
+                                               receiver=user.user, room=user.room)])
+                        return HttpResponse(response, content_type='application/json')
+                elif 'user' in body:
+                    user = body['user']
+                    users = Visit.objects.filter(user__username=user, end__isnull=True).first()
+                    if not users:
+                        response = dict()
+                        response['error'] = 'user not found'
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=404
+                        )
+                    else:
+                        instance = Message(title=str(body['subject']),
+                                           text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
+                                           receiver=users.user, room=users.room)
+                        instance.save()
+                        instance2 = NewMessage(message=instance)
+                        instance2.save()
+                        response = serialize("json", [instance])
+                        return HttpResponse(response, content_type='application/json')
+                else:
+                    response = dict()
+                    response['error'] = 'bad request, room or user missing'
+                    return HttpResponse(
+                        json.dumps(response),
+                        content_type='application/json',
+                        status=400
+                    )
+        else:
+            response = dict()
+            response['error'] = 'bad request, text, title or sender missing'
+            return HttpResponse(
+                json.dumps(response),
+                content_type='application/json',
+                status=400
+            )
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
@@ -639,3 +747,4 @@ class UserView(View):
         context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)
+

@@ -61,37 +61,50 @@ $("#newmessage").submit(function(event) {
     /* stop form from submitting normally */
     //$('#alertModal').modal('show');
     event.preventDefault();
+    if($('#subject').val()=='' || $('#message').val()==''){
+        replace('messageModalLabel', "Message must have subject and body");
+        $('#messageModal').modal('show');
+    }else {
+        /* get the action attribute from the <form action=""> element */
+        var $form = $(this);//, url = $form.attr( 'action' );
+        var url = "/room4u/api/messages/";
+        var http = new XMLHttpRequest();
+        var subject = $('#subject').val();
+        var message = $('#message').val();
+        var destination = $('#destination').val();
+        var destflag = $('#destflag').val();
+        var sender = $('#sender').val();
+        if (destflag == "user") {
+            var params = {
+                "subject": subject.toString(),
+                "message": message.toString(),
+                "sender": sender.toString(),
+                "user": destination.toString()
+            };
+        } else {
+            var params = {
+                "subject": subject.toString(),
+                "message": message.toString(),
+                "sender": sender.toString(),
+                "room": destination.toString()
+            };
+        }
+        /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
 
-    /* get the action attribute from the <form action=""> element */
-    var $form = $(  this );//, url = $form.attr( 'action' );
-    var url = "/room4u/messages/handler";
-    var http = new XMLHttpRequest();
-    var subject = $('#subject').val();
-    var message = $('#message').val();
-    var destination = $('#destination').val();
-    var destflag = $('#destflag').val();
-    var params = "subject=" + subject.toString() + "&message=" + message.toString() + "&destination=" + destination.toString() + "&destflag=" + destflag.toString();
-
-    /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
-
-     /* Alerts the results */
-    /*posting.done(function( data ) {
-     alert('success');
-     });*/
-    http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    http.onreadystatechange = function () {
-        if (this.responseText=="sm"){
-            replace('messageModalLabel', "Message must have subject and body");
-            $('#messageModal').modal('show');
-        }else {
+         /* Alerts the results */
+        /*posting.done(function( data ) {
+         alert('success');
+         });*/
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-type", "application/json");
+        http.onreadystatechange = function (data) {
             if (this.readyState == 4) {
                 replace('alertModalLabel', "New Message");
                 replace('but', "Return To Messages");
                 document.getElementById('but').onclick = function () {
                     window.location.href = "/room4u/messages";
                 }
-                if (this.status == 200){
+                if (this.status == 200) {
                     $('#messageModal').modal('hide');
                     replace('alertModalText', "Message sent");
                 } else {
@@ -100,9 +113,9 @@ $("#newmessage").submit(function(event) {
                 }
                 $('#alertModal').modal('show');
             }
-        }
-    };
-    http.send(params);
+        };
+        http.send(JSON.stringify(params));
+    }
 
 });
 
