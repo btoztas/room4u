@@ -15,6 +15,7 @@ from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
 import json
+#import datetime
 
 if 'RDS_DB_NAME' in os.environ:
 
@@ -200,42 +201,37 @@ class MessageView(View):
                         messages = Message.objects.filter(room__name__contains=str(text), receiver=request.user)
                 else:
                     if str(date) == "year":
-                        startdate=timezone.now().today()
-                        enddate = timezone.now().today().replace(year=timezone.now().today().year-1)
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=365)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "6month":
-                        startdate = timezone.now().today()
-                        if(timezone.now().today().month - 6>0):
-                            enddate = timezone.now().today().replace(month=timezone.now().today().month - 6)
-                        else:
-                            enddate = timezone.now().today().replace(month=12 + timezone.now().today().month - 6, year=timezone.now().today().year-1)
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=180)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "month":
-                        startdate = timezone.now().today()
-                        if (timezone.now().today().month - 1 > 0):
-                            enddate = timezone.now().today().replace(month=timezone.now().today().month - 1)
-                        else:
-                            enddate = timezone.now().today().replace(month=12, year=timezone.now().today().year-1)
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=30)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "week":
-                        startdate = timezone.now().today()
-                        enddate = timezone.now().today().replace(day=timezone.now().today().day - 7)
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=7)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "today":
-                        startdate = timezone.now().today()
-                        enddate = timezone.now().today().replace(hour=0)
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(hours=13)
+                        print (enddate)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
@@ -266,22 +262,38 @@ class ApiView(View):
         return HttpResponse("done")
 
 class RoomsApiView(View):
-
     def get(self, request, **kwargs):
         if 'room_id' in kwargs:
-            if 'search' in kwargs:
-                if kwargs['search'] == "visits":
-                    visits = Visit.objects.filter(room=kwargs['room_id'])
-                    response = serialize("json", visits)
-                    return HttpResponse(response, content_type='application/json')
-                if kwargs['search'] == "messages":
-                    messages = Message.objects.filter(room=kwargs['room_id'])
-                    response = serialize("json", messages)
-                    return HttpResponse(response, content_type='application/json')
+            if not Room.objects.filter(id=kwargs['room_id']):
+                response = dict()
+                response['error'] = 'room not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
             else:
-                rooms = Room.objects.filter(id=kwargs['room_id'])
-                response = serialize("json", rooms)
-                return HttpResponse(response, content_type='application/json')
+                if 'search' in kwargs:
+                    if kwargs['search'] == "visits":
+                            visits = Visit.objects.filter(room=kwargs['room_id'])
+                            response = serialize("json", visits)
+                            return HttpResponse(response, content_type='application/json')
+                    elif kwargs['search'] == "messages":
+                        messages = Message.objects.filter(room=kwargs['room_id'])
+                        response = serialize("json", messages)
+                        return HttpResponse(response, content_type='application/json')
+                    else:
+                        response = dict()
+                        response['error'] = 'bad request, last parameter must be \'visits\' or \'messages\''
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=400
+                        )
+                else:
+                    rooms = Room.objects.filter(id=kwargs['room_id'])
+                    response = serialize("json", rooms)
+                    return HttpResponse(response, content_type='application/json')
         else:
             if request.method == 'GET':
                 rooms = Room.objects.all()
@@ -292,9 +304,18 @@ class MessagesApiView(View):
 
     def get(self, request, **kwargs):
         if 'message_id' in kwargs:
-            messages = Message.objects.filter(id=kwargs['message_id'])
-            response = serialize("json", messages)
-            return HttpResponse(response, content_type='application/json')
+            if not Message.objects.filter(id=kwargs['message_id']):
+                response = dict()
+                response['error'] = 'message not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+            else:
+                messages = Message.objects.filter(id=kwargs['message_id'])
+                response = serialize("json", messages)
+                return HttpResponse(response, content_type='application/json')
         else:
             if request.method == 'GET':
                 messages = Message.objects.all()
@@ -302,7 +323,7 @@ class MessagesApiView(View):
                 return HttpResponse(response, content_type='application/json')
     def post(self, request):
         body = json.loads(request.body)
-        if 'subject' in body and 'message' in body and 'sender' in body:
+        if 'subject' in body and 'message' in body and 'sender_id' in body:
             if body['subject']=="" or body['message']=="":
                 response = dict()
                 response['error'] = 'bad request, subject or body empty'
@@ -323,18 +344,39 @@ class MessagesApiView(View):
                             status=404
                         )
                     else:
-                        users = Visit.objects.filter(room=destination, end__isnull=True)
-                        for user in users:
-                            instance = Message(title=str(body['subject']),
-                                               text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
-                                               receiver=user.user, room=user.room)
-                            instance.save()
-                            instance2 = NewMessage(message=instance)
-                            instance2.save()
-                        response = serialize("json", [Message(title=str(body['subject']),
-                                               text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
-                                               receiver=user.user, room=user.room)])
-                        return HttpResponse(response, content_type='application/json')
+                        if body['sender_id'].isdigit():
+                            if not User.objects.filter(id=body['sender_id']):
+                                response = dict()
+                                response['error'] = 'sender not found'
+                                return HttpResponse(
+                                    json.dumps(response),
+                                    content_type='application/json',
+                                    status=404
+                                )
+                            else:
+                                users = Visit.objects.filter(room=destination, end__isnull=True)
+                                for user in users:
+                                    instance = Message(title=str(body['subject']),
+                                                       text=str(body['message']),
+                                                       sender=User.objects.filter(id=body['sender_id']).first(),
+                                                       receiver=user.user, room=user.room)
+                                    instance.save()
+                                    instance2 = NewMessage(message=instance)
+                                    instance2.save()
+                                    response = serialize("json", [Message(title=str(body['subject']),
+                                                                          text=str(body['message']),
+                                                                          sender=User.objects.filter(
+                                                                              id=body['sender_id']).first(),
+                                                                          receiver=user.user, room=user.room)])
+                                    return HttpResponse(response, content_type='application/json')
+                        else:
+                            response = dict()
+                            response['error'] = 'sender not found'
+                            return HttpResponse(
+                                json.dumps(response),
+                                content_type='application/json',
+                                status=404
+                            )
                 elif 'user' in body:
                     user = body['user']
                     users = Visit.objects.filter(user__username=user, end__isnull=True).first()
@@ -347,14 +389,32 @@ class MessagesApiView(View):
                             status=404
                         )
                     else:
-                        instance = Message(title=str(body['subject']),
-                                           text=str(body['message']), sender=User.objects.filter(id=body['sender']).first(),
-                                           receiver=users.user, room=users.room)
-                        instance.save()
-                        instance2 = NewMessage(message=instance)
-                        instance2.save()
-                        response = serialize("json", [instance])
-                        return HttpResponse(response, content_type='application/json')
+                        if body['sender_id'].isdigit():
+                            if not User.objects.filter(id=body['sender_id']).first():
+                                response = dict()
+                                response['error'] = 'sender not found'
+                                return HttpResponse(
+                                    json.dumps(response),
+                                    content_type='application/json',
+                                    status=404
+                                )
+                            else:
+                                instance = Message(title=str(body['subject']),
+                                                   text=str(body['message']), sender=User.objects.filter(id=body['sender_id']).first(),
+                                                   receiver=users.user, room=users.room)
+                                instance.save()
+                                instance2 = NewMessage(message=instance)
+                                instance2.save()
+                                response = serialize("json", [instance])
+                                return HttpResponse(response, content_type='application/json')
+                        else:
+                            response = dict()
+                            response['error'] = 'sender not found'
+                            return HttpResponse(
+                                json.dumps(response),
+                                content_type='application/json',
+                                status=404
+                            )
                 else:
                     response = dict()
                     response['error'] = 'bad request, room or user missing'
@@ -365,7 +425,7 @@ class MessagesApiView(View):
                     )
         else:
             response = dict()
-            response['error'] = 'bad request, text, title or sender missing'
+            response['error'] = 'bad request, text, title or sender_id missing'
             return HttpResponse(
                 json.dumps(response),
                 content_type='application/json',

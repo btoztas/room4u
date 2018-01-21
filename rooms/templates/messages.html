@@ -8,36 +8,34 @@
         <li class="breadcrumb-item active">Messages</li>
     </ol>
 
+    <form action={{ request.get_full_path }} method="post" class="form-inline my-2 my-lg-0 mr-lg-2">
+        <div class="input-group">
+            {% csrf_token %}
 
-    <form action={{ request.get_full_path }} method="post">
-        {% csrf_token %}
-        <div class="form-group ">
-        <input type="hidden" name="filter" value="Search">
-        <input type="hidden" name="date" value="date">
-        <input type="hidden" name="sdate" value="sdate">
+            <input type="radio" name="filter" id="filter" value="Search"
+                   style=" margin-top: 10px; vertical-align: middle; margin-right: 5px" required
+                    {% if search_type == 'room' %} checked {% endif %}>
+            <label for="search_type1" style="margin-right: 10px">Keyword</label>
 
-        <!--<label for="keyword">Search Keyword</label><br>-->
-        <input class="form-control" type="text" id="text" name="text" placeholder="Write keyword...">
+            <input type="radio" name="filter" id="filter" value="Room"
+                   style=" margin-top: 10px; vertical-align: middle; margin-right: 5px"
+                    {% if search_type == 'username' %} checked {% endif %}>
+            <label for="search_type2" style="margin-right: 10px">Room</label>
 
-        <!--<input type="submit" class="btn btn-info" value="Search" style="width:133px"><br><br>-->
+            <input type="hidden" name="date" value="date">
+            <input type="hidden" name="sdate" value="sdate">
+
+            <input class="form-control" type="text" name="text" id="text"
+                   placeholder="Search" style="width: 200px">
+
+            <span class="input-group-btn">
+                <button class="btn btn-primary" type="submit">
+                  <i class="fa fa-search"></i>
+                </button>
+            </span>
+
         </div>
-        <button class="btn btn-primary btn-block" type="submit">Search</button><br><br>
-
-    </form>
-    <form action={{ request.get_full_path }} method="post">
-        {% csrf_token %}
-        <div class="form-group ">
-        <input type="hidden" name="filter" value="Room">
-
-        <!--<label for="room">Filter by Room</label><br>-->
-        <input type="hidden" name="date" value="date">
-        <input type="hidden" name="sdate" value="sdate">
-        <input class = "form-control" type="text" id="text" name="text" placeholder="Search in room...">
-        </div>
-        <!--<input type="submit" class="btn btn-info" value="Filter by Room"><br><br>-->
-        <button class="btn btn-primary btn-block" type="submit">Filter by Room</button><br><br>
-
-    </form>
+    </form><br>
 
     <form action={{ request.get_full_path }} method="post">
         {% csrf_token %}
@@ -62,7 +60,7 @@
 
         <!--<input type="submit" class="btn btn-info" value="Filter by Date" style="width:135px"><br><br>-->
 
-        <button class="btn btn-primary btn-block" type="submit">Filter by Date</button><br><br>
+        <button class="btn btn-primary btn-block" type="submit">Filter by Date</button><br>
 
         <a href="/room4u/messages">
                 <i class="fa fa-angle-double-left" aria-hidden="true"></i> Back
@@ -108,8 +106,7 @@
             var text = document.getElementById("date").value;
             if (text.toString() == "specific_date") {
                 document.getElementById("sdate").outerHTML = "<input type =\"date\" id = \"sdate\" name=\"sdate\" class=\"form-control\">";
-                //<p>Date: <input type="text" id="datepicker"></p>
-            } else {
+                } else {
                 document.getElementById("sdate").outerHTML = "<input type =\"hidden\" id = \"sdate\" name=\"sdate\" class=\"form-control\">";
                 document.getElementById("sdate").value = "text";
             }
