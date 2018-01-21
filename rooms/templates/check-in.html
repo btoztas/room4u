@@ -124,10 +124,8 @@
                                 </td>
                                 <td width="10%">
                                     <a href="#">
-                                        <button class="btn btn-primary" id="{{ room.room }}"
-                                                onclick="newMessageForm('{{ room.room }}')">
-                                            <i class="fa fa-paper-plane"></i> Send Message
-                                        </button>
+                                        <button class="btn btn-primary" id="{{ room.room }}" onclick="newMessageForm('{{ room.room }}')">
+                                            <i class="fa fa-paper-plane"></i> Send Message</button>
                                     </a>
 
                                 </td>
@@ -155,12 +153,10 @@
                                         <td>{{ user.user.username }}</td>
                                         <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
                                         <td>{{ user.start }}</td>
-                                        <td>
+                                        <td align="right">
                                             <a href="#">
-                                                <button class="btn btn-primary" id="{{ user.user.username }}"
-                                                        onclick="newMessageForm2('{{ user.user.username }}')">
-                                                    <i class="fa fa-paper-plane"></i> Send Message
-                                                </button>
+                                                <button class="btn btn-primary" id="{{ user.user.username }}" onclick="newMessageForm2('{{ user.user.username }}')">
+                                                    <i class="fa fa-paper-plane"></i> Send Message</button>
                                             </a>
                                         </td>
                                     </tr>

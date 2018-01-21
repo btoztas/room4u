@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView, \
     CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView, UsersView, UserView, \
-    VisitApiView, NewMessageApiView, UserApiView
+    VisitApiView, NewMessageApiView, UserApiView, RoomsApiView, MessagesApiView
 
 urlpatterns = [
 
@@ -29,6 +29,11 @@ urlpatterns = [
 
     # API urls
     url(r'^api/$', ApiView.as_view()),
+    url(r'^api/rooms/$', RoomsApiView.as_view()),
+    url(r'^api/rooms/(?P<room_id>\d+)/$', RoomsApiView.as_view()),
+    url(r'^api/rooms/(?P<room_id>\d+)/(?P<search>.*)/$', RoomsApiView.as_view()),
+    url(r'^api/messages/$', csrf_exempt(MessagesApiView.as_view())),
+    url(r'^api/messages/(?P<message_id>\d+)/$', MessagesApiView.as_view()),
     url(r'^api/visits$', csrf_exempt(VisitApiView.as_view())),
     url(r'^api/visits/(?P<visit_id>\d+)$', csrf_exempt(VisitApiView.as_view())),
     url(r'^api/new_messages$', csrf_exempt(NewMessageApiView.as_view())),
@@ -36,6 +41,5 @@ urlpatterns = [
     url(r'^api/users$', csrf_exempt(UserApiView.as_view())),
     url(r'^api/users/(?P<user_id>\d+)$', csrf_exempt(UserApiView.as_view())),
     url(r'^api/users/(?P<user_id>\d+)/(?P<resource>.*)$', csrf_exempt(UserApiView.as_view())),
-
 ]
 

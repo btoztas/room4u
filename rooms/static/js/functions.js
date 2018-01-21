@@ -62,73 +62,90 @@ function check_out(room, user) {
 }
 
 
-$("#newmessage").submit(function (event) {
+$("#newmessage").submit(function(event) {
 
 
     /* stop form from submitting normally */
+    //$('#alertModal').modal('show');
     event.preventDefault();
-    $('#messageModal').modal('hide');
-
-    /* get the action attribute from the <form action=""> element */
-    var $form = $(this);//, url = $form.attr( 'action' );
-    var url = "/room4u/messages/handler"
-    var http = new XMLHttpRequest();
-    var rname = $('#rname').val();
-    var subject = $('#subject').val();
-    var message = $('#message').val();
-    var destination = $('#destination').val();
-    var destflag = $('#destflag').val();
-    var params = "rname=" + rname.toString() + "&subject=" + subject.toString() + "&message=" + message.toString() + "&destination=" + destination.toString() + "&destflag=" + destflag.toString();
-
-    /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
-
-     /* Alerts the results */
-    /*posting.done(function( data ) {
-     alert('success');
-     });*/
-    http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-
-    http.onreadystatechange = function () {
-
-        if (this.readyState == 4) {
-            replace('alertModalLabel', "New Message");
-            replace('but', "Return To Messages");
-            document.getElementById('but').onclick = function () {
-                window.location.href = "/room4u/messages";
-            }
-
-            if (this.status == 200) {
-                replace('alertModalText', "Message sent");
-            } else {
-                replace('alertModalText', "Could not send the message. Try again later");
-            }
-            $('#alertModal').modal('show');
+    if($('#subject').val()=='' || $('#message').val()==''){
+        replace('messageModalLabel', "Message must have subject and body");
+        $('#messageModal').modal('show');
+    }else {
+        /* get the action attribute from the <form action=""> element */
+        var $form = $(this);//, url = $form.attr( 'action' );
+        var url = "/room4u/api/messages/";
+        var http = new XMLHttpRequest();
+        var subject = $('#subject').val();
+        var message = $('#message').val();
+        var destination = $('#destination').val();
+        var destflag = $('#destflag').val();
+        var sender = $('#sender').val();
+        if (destflag == "user") {
+            var params = {
+                "subject": subject.toString(),
+                "message": message.toString(),
+                "sender": sender.toString(),
+                "user": destination.toString()
+            };
+        } else {
+            var params = {
+                "subject": subject.toString(),
+                "message": message.toString(),
+                "sender": sender.toString(),
+                "room": destination.toString()
+            };
         }
-    };
+        /*var posting = $.post( url, { rname: $('#rname').val(), subject: $('#subject').val(), message: $('#message').val()} );
 
-    http.send(params);
+         /* Alerts the results */
+        /*posting.done(function( data ) {
+         alert('success');
+         });*/
+        http.open("POST", url, true);
+        http.setRequestHeader("Content-type", "application/json");
+        http.onreadystatechange = function (data) {
+            if (this.readyState == 4) {
+                replace('alertModalLabel', "New Message");
+                replace('but', "Return To Messages");
+                document.getElementById('but').onclick = function () {
+                    window.location.href = "/room4u/messages";
+                }
+                if (this.status == 200) {
+                    $('#messageModal').modal('hide');
+                    replace('alertModalText', "Message sent");
+                } else {
+                    $('#messageModal').modal('hide');
+                    replace('alertModalText', "Could not send the message. Try again later");
+                }
+                $('#alertModal').modal('show');
+            }
+        };
+        http.send(JSON.stringify(params));
+    }
 
 });
 
 function newMessageForm(destination) {
     document.getElementById("destination").value = destination;
     document.getElementById("destflag").value = "room";
+    replace('messageModalLabel', "New Message");
     $('#messageModal').modal('show');
 }
 
 function newMessageForm2(destination) {
     document.getElementById("destination").value = destination;
     document.getElementById("destflag").value = "user";
+    replace('messageModalLabel', "New Message");
     $('#messageModal').modal('show');
 }
 
 function income() {
     $.ajax({
-        url: '/room4u/messages/incoming',
-        type: "POST",
-        success: function (data) {  // success is the callback when the server
-            if (data != "nothing") {
+        url:'/room4u/messages/incoming',
+        type:"POST",
+        success:function(data){  // success is the callback when the server
+            if (data != "nothing"){
                 var message = JSON.parse(data);
                 replace('alertModalLabel', "Message Received");
                 replace('but', "Ok");
@@ -140,6 +157,6 @@ function income() {
 }
 
 income(); // This will run on page load
-setInterval(function () {
+setInterval(function(){
     income() // this will run after every 5 seconds
 }, 5000);

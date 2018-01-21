@@ -17,6 +17,8 @@ from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
+import json
+#import datetime
 
 if 'RDS_DB_NAME' in os.environ:
 
@@ -147,6 +149,8 @@ class NewMessageHandlerView(View):
                     instance2 = NewMessage(message=instance)
                     instance2.save()
                 return HttpResponse(status=200)
+            else:
+                return HttpResponse("sm")
 
     def get(self, request, *args, **kwargs):
         return redirect('/room4u')
@@ -158,7 +162,7 @@ class MessageView(View):
     def get(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return redirect('/room4u')
-        if request.user.username == "administrator":
+        if request.user.is_staff:
             messages = Message.objects.all()
         else:
             messages = Message.objects.filter(receiver=request.user)
@@ -179,7 +183,6 @@ class MessageView(View):
         if request.method == 'POST':
             # create a form instance and populate it with data from the request:
             form = FilterForm(request.POST)
-            print (request.POST.get("sdate", ""))
             datee = (request.POST.get("sdate", "")).split("-")
             # check whether it's valid:
             if form.is_valid():
@@ -190,34 +193,61 @@ class MessageView(View):
                 date = request.POST.get("date", "")
                 sdate = request.POST.get("sdate", "")
                 if str(filter) == "Search":
-                    messages = Message.objects.filter(text__contains=str(text))
-                    messages = messages | Message.objects.filter(title__contains=str(text))
+                    if request.user.is_staff:
+                        messages = Message.objects.filter(text__contains=str(text))
+                        messages = messages | Message.objects.filter(title__contains=str(text))
+                    else:
+                        messages = Message.objects.filter(text__contains=str(text), receiver=request.user)
+                        messages = messages | Message.objects.filter(title__contains=str(text))
                 elif str(filter) == "Room":
-                    messages = Message.objects.filter(room__contains=str(text))
+                    if request.user.is_staff:
+                        messages = Message.objects.filter(room__name__contains=str(text))
+                    else:
+                        messages = Message.objects.filter(room__name__contains=str(text), receiver=request.user)
                 else:
                     if str(date) == "year":
-                        startdate = timezone.today()
-                        enddate = timezone.today().replace(year=timezone.today().year - 1)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=365)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "6month":
-                        startdate = timezone.today()
-                        enddate = timezone.today().replace(month=timezone.today().month - 6)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=180)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "month":
-                        startdate = timezone.today()
-                        enddate = timezone.today().replace(month=timezone.today().month - 1)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=30)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "week":
-                        startdate = timezone.now().today()
-                        enddate = timezone.now().today().replace(day=timezone.now().today().day - 7)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(days=7)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "today":
-                        startdate = timezone.now().today()
-                        enddate = timezone.now().today().replace(hour=0)
-                        messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        startdate = timezone.now()
+                        enddate = timezone.now() - timezone.timedelta(hours=13)
+                        print (enddate)
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate])
+                        else:
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
                     if str(date) == "specific_date":
-                        messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
-                                                          created_at__day=datee[2])
+                        if request.user.is_staff:
+                            messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
+                                                              created_at__day=datee[2])
+                        else:
+                            messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
+                                                              created_at__day=datee[2], receiver=request.user)
                 context = {
                     'username': request.user.username,
                     'is_admin': request.user.is_staff,
@@ -228,11 +258,184 @@ class MessageView(View):
                     'messages': messages
                 }
                 return render(request, self.message_template, context)
+            else:
+                return redirect('/room4u/messages')
 
 
 class ApiView(View):
     def get(self, request, *args, **kwargs):
         return HttpResponse("done")
+
+class RoomsApiView(View):
+    def get(self, request, **kwargs):
+        if 'room_id' in kwargs:
+            if not Room.objects.filter(id=kwargs['room_id']):
+                response = dict()
+                response['error'] = 'room not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+            else:
+                if 'search' in kwargs:
+                    if kwargs['search'] == "visits":
+                            visits = Visit.objects.filter(room=kwargs['room_id'])
+                            response = serialize("json", visits)
+                            return HttpResponse(response, content_type='application/json')
+                    elif kwargs['search'] == "messages":
+                        messages = Message.objects.filter(room=kwargs['room_id'])
+                        response = serialize("json", messages)
+                        return HttpResponse(response, content_type='application/json')
+                    else:
+                        response = dict()
+                        response['error'] = 'bad request, last parameter must be \'visits\' or \'messages\''
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=400
+                        )
+                else:
+                    rooms = Room.objects.filter(id=kwargs['room_id'])
+                    response = serialize("json", rooms)
+                    return HttpResponse(response, content_type='application/json')
+        else:
+            if request.method == 'GET':
+                rooms = Room.objects.all()
+                response = serialize("json", rooms)
+                return HttpResponse(response, content_type='application/json')
+
+class MessagesApiView(View):
+
+    def get(self, request, **kwargs):
+        if 'message_id' in kwargs:
+            if not Message.objects.filter(id=kwargs['message_id']):
+                response = dict()
+                response['error'] = 'message not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+            else:
+                messages = Message.objects.filter(id=kwargs['message_id'])
+                response = serialize("json", messages)
+                return HttpResponse(response, content_type='application/json')
+        else:
+            if request.method == 'GET':
+                messages = Message.objects.all()
+                response = serialize("json", messages)
+                return HttpResponse(response, content_type='application/json')
+    def post(self, request):
+        body = json.loads(request.body)
+        if 'subject' in body and 'message' in body and 'sender_id' in body:
+            if body['subject']=="" or body['message']=="":
+                response = dict()
+                response['error'] = 'bad request, subject or body empty'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=400
+                )
+            else:
+                if 'room' in body:
+                    destination = Room.objects.filter(id=body['room'])
+                    if not destination:
+                        response = dict()
+                        response['error'] = 'room not found'
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=404
+                        )
+                    else:
+                        if body['sender_id'].isdigit():
+                            if not User.objects.filter(id=body['sender_id']):
+                                response = dict()
+                                response['error'] = 'sender not found'
+                                return HttpResponse(
+                                    json.dumps(response),
+                                    content_type='application/json',
+                                    status=404
+                                )
+                            else:
+                                users = Visit.objects.filter(room=destination, end__isnull=True)
+                                for user in users:
+                                    instance = Message(title=str(body['subject']),
+                                                       text=str(body['message']),
+                                                       sender=User.objects.filter(id=body['sender_id']).first(),
+                                                       receiver=user.user, room=user.room)
+                                    instance.save()
+                                    instance2 = NewMessage(message=instance)
+                                    instance2.save()
+                                    response = serialize("json", [Message(title=str(body['subject']),
+                                                                          text=str(body['message']),
+                                                                          sender=User.objects.filter(
+                                                                              id=body['sender_id']).first(),
+                                                                          receiver=user.user, room=user.room)])
+                                    return HttpResponse(response, content_type='application/json')
+                        else:
+                            response = dict()
+                            response['error'] = 'sender not found'
+                            return HttpResponse(
+                                json.dumps(response),
+                                content_type='application/json',
+                                status=404
+                            )
+                elif 'user' in body:
+                    user = body['user']
+                    users = Visit.objects.filter(user__username=user, end__isnull=True).first()
+                    if not users:
+                        response = dict()
+                        response['error'] = 'user not found'
+                        return HttpResponse(
+                            json.dumps(response),
+                            content_type='application/json',
+                            status=404
+                        )
+                    else:
+                        if body['sender_id'].isdigit():
+                            if not User.objects.filter(id=body['sender_id']).first():
+                                response = dict()
+                                response['error'] = 'sender not found'
+                                return HttpResponse(
+                                    json.dumps(response),
+                                    content_type='application/json',
+                                    status=404
+                                )
+                            else:
+                                instance = Message(title=str(body['subject']),
+                                                   text=str(body['message']), sender=User.objects.filter(id=body['sender_id']).first(),
+                                                   receiver=users.user, room=users.room)
+                                instance.save()
+                                instance2 = NewMessage(message=instance)
+                                instance2.save()
+                                response = serialize("json", [instance])
+                                return HttpResponse(response, content_type='application/json')
+                        else:
+                            response = dict()
+                            response['error'] = 'sender not found'
+                            return HttpResponse(
+                                json.dumps(response),
+                                content_type='application/json',
+                                status=404
+                            )
+                else:
+                    response = dict()
+                    response['error'] = 'bad request, room or user missing'
+                    return HttpResponse(
+                        json.dumps(response),
+                        content_type='application/json',
+                        status=400
+                    )
+        else:
+            response = dict()
+            response['error'] = 'bad request, text, title or sender_id missing'
+            return HttpResponse(
+                json.dumps(response),
+                content_type='application/json',
+                status=400
+            )
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
@@ -614,7 +817,6 @@ class UserView(View):
         context['all_visits_total'] = len(context['all_visits'])
 
         return render(request, self.template, context)
-
 
 class VisitApiView(View):
 
