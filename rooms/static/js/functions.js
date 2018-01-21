@@ -2,14 +2,17 @@ function replace(id, text) {
     document.getElementById(id).innerHTML = text;
 }
 
-function check_in(room_id, room_name) {
+function check_in(room, room_name, user) {
 
     var http = new XMLHttpRequest();
-    var url = "/room4u/check-in/new";
-    var params = "room=" + room_id;
+    var url = "/room4u/api/visits";
+    var params = {
+        "room": room,
+        "user": user
+    };
 
     http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.setRequestHeader("Content-type", "application/json");
 
     http.onreadystatechange = function () {
 
@@ -27,15 +30,19 @@ function check_in(room_id, room_name) {
         }
     };
 
-    http.send(params);
+    http.send(JSON.stringify(params));
 }
 
-function check_out() {
+function check_out(room, user) {
     var http = new XMLHttpRequest();
-    var url = "/room4u/check-out";
+    var url = "/room4u/api/visits";
 
-    http.open("POST", url, true);
-    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    http.open("PUT", url, true);
+    http.setRequestHeader("Content-type", "application/json");
+    var params = {
+        "room": room,
+        "user": user
+    };
 
     http.onreadystatechange = function () {
 
@@ -50,7 +57,7 @@ function check_out() {
         }
     };
 
-    http.send();
+    http.send(JSON.stringify(params));
 
 }
 
