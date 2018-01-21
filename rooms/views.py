@@ -1,5 +1,7 @@
 import json
 import os
+import string
+
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -615,6 +617,7 @@ class UserView(View):
 
 
 class VisitApiView(View):
+
     def get(self, request, *args, **kwargs):
 
         if 'visit_id' in kwargs:
@@ -631,23 +634,19 @@ class VisitApiView(View):
                     content_type='application/json',
                     status=404
                 )
+            return HttpResponse(
+                serialize("json", [visit]),
+                content_type='application/json',
+                status=200
+            )
         else:
             visits = Visit.objects.all()
 
-            if visits:
-                return HttpResponse(
-                    serialize("json", visits),
-                    content_type='application/json',
-                    status=200
-                )
-
-        response = dict()
-        response['error'] = 'bad request'
-        return HttpResponse(
-            json.dumps(response),
-            content_type='application/json',
-            status=400
-        )
+            return HttpResponse(
+                serialize("json", visits),
+                content_type='application/json',
+                status=200
+            )
 
     def post(self, request, *args, **kwargs):
 
@@ -658,7 +657,7 @@ class VisitApiView(View):
             try:
                 user = User.objects.get(id=body['user'])
                 room = Room.objects.get(id=body['room'])
-            except (User.DoesNotExist, Room.DoesNotExist):
+            except (User.DoesNotExist, Room.DoesNotExist, ValueError):
 
                 response = dict()
                 response['error'] = 'room or user not found'
@@ -779,3 +778,124 @@ class VisitApiView(View):
             content_type='application/json',
             status=405
         )
+
+
+class NewMessageApiView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        if 'new_message_id' in kwargs:
+            new_message_id = kwargs['new_message_id']
+
+            try:
+                new_message = NewMessage.objects.filter(id=new_message_id).get()
+
+            except NewMessage.DoesNotExist:
+                response = dict()
+                response['error'] = 'resource not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+            return HttpResponse(
+                serialize("json", [new_message]),
+                content_type='application/json',
+                status=200
+            )
+        else:
+            new_messages = NewMessage.objects.all()
+
+            return HttpResponse(
+                serialize("json", new_messages),
+                content_type='application/json',
+                status=200
+            )
+
+    def delete(self, request, *args, **kwargs):
+
+        if 'new_message_id' in kwargs:
+            new_message_id = kwargs['new_message_id']
+
+            try:
+                new_message = NewMessage.objects.filter(id=new_message_id).get()
+                new_message.delete()
+                return HttpResponse(
+                    status=204
+                )
+
+            except NewMessage.DoesNotExist:
+                response = dict()
+                response['error'] = 'resource not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+        response = dict()
+        response['error'] = 'not allowed'
+        return HttpResponse(
+            json.dumps(response),
+            content_type='application/json',
+            status=405
+        )
+
+
+class UserApiView(View):
+
+    def get(self, request, *args, **kwargs):
+
+        if 'user_id' in kwargs:
+            user_id = kwargs['user_id']
+
+            try:
+                user = User.objects.filter(id=user_id).get()
+
+            except User.DoesNotExist:
+                response = dict()
+                response['error'] = 'resource not found'
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=404
+                )
+
+            if 'resource' in kwargs:
+                resource = kwargs['resource']
+
+                if resource == 'new_messages':
+                    response = serialize("json", NewMessage.objects.filter(message__receiver=user).all())
+
+                elif resource == 'messages':
+                    response = serialize("json", Message.objects.filter(receiver=user).all())
+
+                elif resource == 'visits':
+                    response = serialize("json", Visit.objects.filter(user=user).all())
+
+                else:
+                    response = dict()
+                    response['error'] = 'resource not found'
+                    response = json.dumps(response)
+                return HttpResponse(
+                    response,
+                    content_type='application/json',
+                    status=404
+                )
+
+            return HttpResponse(
+                serialize("json", [user]),
+                content_type='application/json',
+                status=200
+            )
+
+        else:
+            users = User.objects.all()
+
+            return HttpResponse(
+                serialize("json", users),
+                content_type='application/json',
+                status=200
+            )
+
