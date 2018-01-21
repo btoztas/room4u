@@ -109,7 +109,7 @@ class IncomingMessageView(View):
         if not NewMessage.objects.filter(message__receiver=request.user.id):
             return HttpResponse("nothing")
         # filter
-        message = NewMessage.objects.filter(message__receiver=request.user.id).get()
+        message = NewMessage.objects.filter(message__receiver=request.user.id).first()
         NewMessage.objects.filter(id=message.id).delete()
         return HttpResponse(serialize('json', [message.message, ]))
 
@@ -1101,3 +1101,37 @@ class UserApiView(View):
                 status=200
             )
 
+    def delete(self, request, *args, **kwargs):
+        if 'user_id' in kwargs and 'resource' in kwargs:
+            if kwargs['resource']=='new_messages':
+                if not NewMessage.objects.filter(message__receiver=kwargs['user_id']):
+                    return HttpResponse(
+                        json.dumps([]),
+                        content_type='application/json',
+                        status=200
+                    )
+                else:
+                    # filter
+                    message = NewMessage.objects.filter(message__receiver=kwargs['user_id']).first()
+                    NewMessage.objects.filter(id=message.id).delete()
+                    return HttpResponse(
+                        serialize("json", [message.message, ]),
+                        content_type='application/json',
+                        status=200
+                    )
+            else:
+                response = dict()
+                response['error'] = 'bad request, resource must me \'new_messages\''
+                return HttpResponse(
+                    json.dumps(response),
+                    content_type='application/json',
+                    status=400
+                )
+        else:
+            response = dict()
+            response['error'] = 'bad request, user_id or resource missing'
+            return HttpResponse(
+                json.dumps(response),
+                content_type='application/json',
+                status=400
+            )

@@ -85,14 +85,14 @@ $("#newmessage").submit(function(event) {
             var params = {
                 "subject": subject.toString(),
                 "message": message.toString(),
-                "sender": sender.toString(),
+                "sender_id": sender.toString(),
                 "user": destination.toString()
             };
         } else {
             var params = {
                 "subject": subject.toString(),
                 "message": message.toString(),
-                "sender": sender.toString(),
+                "sender_id": sender.toString(),
                 "room": destination.toString()
             };
         }
@@ -141,15 +141,16 @@ function newMessageForm2(destination) {
 }
 
 function income() {
+    var base_url = '/room4u/api/users/';
+    var url = base_url.concat($('#receiver').val(), "/new_messages")
     $.ajax({
-        url:'/room4u/messages/incoming',
-        type:"POST",
+        url:url,
+        type:"DELETE",
         success:function(data){  // success is the callback when the server
-            if (data != "nothing"){
-                var message = JSON.parse(data);
-                replace('alertModalLabel', "Message Received");
+            if (data.toString() != ''){
+                replace('alertModalLabel', data[0].fields.title);
                 replace('but', "Ok");
-                replace('alertModalText', message[0].fields.text);
+                replace('alertModalText', data[0].fields.text);
                 $('#alertModal').modal('show');
             }
         }
