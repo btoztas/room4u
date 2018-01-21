@@ -3,7 +3,8 @@ from django.contrib.auth import views as auth_views
 from django.views.decorators.csrf import csrf_exempt
 
 from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView, \
-    CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView, UsersView, UserView
+    CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView, UsersView, UserView, \
+    VisitApiView, NewMessageApiView, UserApiView
 
 urlpatterns = [
 
@@ -28,5 +29,13 @@ urlpatterns = [
 
     # API urls
     url(r'^api/$', ApiView.as_view()),
+    url(r'^api/visits$', csrf_exempt(VisitApiView.as_view())),
+    url(r'^api/visits/(?P<visit_id>\d+)$', csrf_exempt(VisitApiView.as_view())),
+    url(r'^api/new_messages$', csrf_exempt(NewMessageApiView.as_view())),
+    url(r'^api/new_messages/(?P<new_message_id>\d+)$', csrf_exempt(NewMessageApiView.as_view())),
+    url(r'^api/users$', csrf_exempt(UserApiView.as_view())),
+    url(r'^api/users/(?P<user_id>\d+)$', csrf_exempt(UserApiView.as_view())),
+    url(r'^api/users/(?P<user_id>\d+)/(?P<resource>.*)$', csrf_exempt(UserApiView.as_view())),
+
 ]
 

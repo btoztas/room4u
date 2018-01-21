@@ -191,7 +191,7 @@
                 {% if checked_in %}
                     <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
                         since {{ checked_in_time }}</div>
-                    <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
+                    <button class="btn btn-primary" type="button" onclick="check_out('{{ checked_in_room_id }}' , '{{ user_id }}')">Check-out</button>
                     <a data-toggle="collapse" href="#usersInRoom">
                         <button class="btn btn-secondary" type="button">Users in this Room</button>
                     </a>
@@ -249,7 +249,7 @@
 
                                     <td width="10%">
                                         <button class="btn btn-primary btn-block" type="submit"
-                                                onclick="check_in('{{ room.id }}', '{{ room.name }}')">Check-in
+                                                onclick="check_in('{{ room.id }}', '{{ room.name }}', '{{ user_id }}')">Check-in
                                         </button>
                                     </td>
                                 </tr>
