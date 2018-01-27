@@ -20,7 +20,7 @@ from django.contrib.auth.models import User
 import json
 #import datetime
 
-if 'RDS_DB_NAME' in os.environ:
+if 'ON_AWS' in os.environ:
 
     config = fenixedu.FenixEduConfiguration \
         ('1132965128044595', SITE_URL + '/room4u/auth',

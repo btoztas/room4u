@@ -94,7 +94,7 @@ else:
         }
     }
 
-if 'RDS_DB_NAME' in os.environ:
+if 'ON_AWS' in os.environ:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
@@ -149,7 +149,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
-if 'RDS_DB_NAME' in os.environ:
+if 'ON_AWS' in os.environ:
     SITE_URL = 'http://room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
