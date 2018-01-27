@@ -1,0 +1,133 @@
+{% extends "blank.html" %}
+
+{% block body %}
+
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item active"><a href="/room4u/rooms">Rooms</a></li>
+        <li class="breadcrumb-item active">{{ room.name }}</li>
+    </ol>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-info"></i> Room Info
+        </div>
+        <div class="card-body ">
+            <div align="center">
+                <h2>{{ room.name }}</h2>
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <tbody>
+                    <tr>
+                        <td align="center">
+                            {% for parent in room_family %}
+                                <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                                <a href="http://127.0.0.1:8000/room4u/rooms/{{ parent.id }}">{{ parent.name }}</a>
+                            {% endfor %}
+                            <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
+                            {{ room.name }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <b>Blueprint</b>
+                        </td>
+                    </tr>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center">
+                            <img src="https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/{{ room.id }}/blueprint"
+                                 width="50%"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <table border="0" width="100%" cellspacing="0">
+                <tbody>
+                <tr>
+                    <td width="87.5%">
+
+                        <i class="fa fa-list-ol"></i> Current Occupancy - {{ current_total }} Visits
+
+                    </td>
+
+                    <td>
+                        {% if current_total >= 1 %}
+                            <button class="btn btn-primary" id="{{ room.id }}"
+                                    onclick="newMessageForm('{{ room.id }}')">
+                                <i class="fa fa-paper-plane"></i> Send Message
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card-body ">
+            {% if current_total >= 1 %}
+                <div class="table-responsive" id="{{ room.room }}">
+
+
+                    <table class="table" id="dataTable" width="100%" cellspacing="0">
+                        <tbody>
+                        {% for visit in current_visits %}
+                            <tr>
+                                <td>{{ visit.user.username }}</td>
+                                <td width="50%">{{ visit.user.first_name }} {{ visit.user.last_name }}</td>
+                                <td width="50%">{{ visit.start }}</td>
+                                <td style="horiz-align: right">
+                                    <button class="btn btn-primary" id="{{ visit.user.usernamee }}"
+                                            onclick="newMessageForm2('{{ visit.user.username }}')">
+                                        <i class="fa fa-paper-plane"></i> Send Message
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            {% else %}
+                There are no visits
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-history"></i> Occupancy History - {{ all_visits_total }} Visits
+        </div>
+        <div class="card-body ">
+            {% if all_visits_total >= 1 %}
+                <div class="table-responsive">
+
+
+                    <table class="table" id="dataTable" width="100%" cellspacing="0">
+                        <tbody>
+                        {% for visit in all_visits %}
+                            <tr>
+                                <td>{{ visit.user.username }}</td>
+                                <td>{{ visit.user.first_name }} {{ visit.user.last_name }}</td>
+                                <td>{{ visit.start }}</td>
+                                <td>{{ visit.end }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            {% else %}
+                There are no visits
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

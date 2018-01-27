@@ -1,0 +1,261 @@
+{% extends "blank.html" %}
+
+{% block body %}
+
+    {% if is_admin %}
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/room4u">room4u</a>
+            </li>
+            <li class="breadcrumb-item active">Check-in</li>
+        </ol>
+        <table>
+            <tr>
+                <td width="70%">
+                    <h4>
+                        {% if search_type == 'username' or search_type  == 'name' %}
+
+                            {% if total == 1 %}
+                                Total: 1 user currently checked-in
+                            {% elif total > 1 %}
+                                Total: {{ total }} users currently checked-in
+                            {% else %}
+                                Total: 0 users currently checked-in
+                            {% endif %}
+
+                        {% else %}
+
+                            {% if total == 1 %}
+                                Total: 1 currently check-in
+                            {% elif total > 1 %}
+                                Total: {{ total }} currently check-ins
+                            {% else %}
+                                Total: 0 currently check-ins
+                            {% endif %}
+
+                        {% endif %}
+                    </h4>
+                </td>
+                <td>
+                    <form method="post" class="form-inline my-2 my-lg-0 mr-lg-2">
+                        <div class="input-group">
+                            {% csrf_token %}
+
+                            <input type="radio" name="search_type" id="search_type1" value="room"
+                                   style=" margin-top: 10px; vertical-align: middle; margin-right: 5px" required
+                                    {% if search_type == 'room' %} checked {% endif %}>
+                            <label for="search_type1" style="margin-right: 10px">Room</label>
+
+                            <input type="radio" name="search_type" id="search_type2" value="username"
+                                   style=" margin-top: 10px; vertical-align: middle; margin-right: 5px"
+                                    {% if search_type == 'username' %} checked {% endif %}>
+                            <label for="search_type2" style="margin-right: 10px">Username</label>
+
+                            <input type="radio" name="search_type" id="search_type3" value="name"
+                                   style=" margin-top: 10px; vertical-align: middle; margin-right: 5px"
+                                    {% if search_type == 'name' %} checked {% endif %}>
+                            <label for="search_type3" style="margin-right: 10px">Name</label>
+
+                            <input class="form-control" type="text" name="search_keyword"
+                                   placeholder="Search" {% if search_keyword %} value="{{ search_keyword }}" {% endif %}
+                                   style="width: 200px">
+
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">
+                                  <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        </table>
+        {% if search_keyword %}
+            <a href="/room4u/check-in">
+                <i class="fa fa-angle-double-left" aria-hidden="true"></i> Back
+            </a>
+        {% endif %}
+        <hr>
+        {% if search_type  == 'username' or search_type  == 'name' %}
+            {% for user in users %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <table>
+                            <tbody>
+                            <tr width="100%">
+                                <td width="99%">
+                                    <i class="fa fa-user"></i>
+                                    <b> {{ user.user.first_name }} {{ user.user.last_name }}
+                                        - {{ user.user.username }}</b> | <i
+                                        class="fa fa-map-pin"></i> {{ user.room.hierarchy }}/{{ user.room.name }}
+                                </td>
+                                <td width="10%">
+
+                                    <a href="/room4u/users/{{ user.user.username }}">
+                                        <button class="btn btn-primary" type="button">View User</button>
+                                    </a>
+                                </td>
+                                <td width="10%">
+
+                                    <a href="/room4u/rooms/{{ user.room.id }}">
+                                        <button class="btn btn-primary" type="button">View Room</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+            {% for room in rooms %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <table>
+                            <tbody>
+                            <tr width="100%">
+                                <td width="99%">
+                                    <i class="fa fa-map-pin"></i>
+                                    {{ room.hierarchy }}/{{ room.name }} -
+                                    {{ room.total }} Check-in{% if room.total > 1 %}s{% endif %}
+                                </td>
+                                <td width="10%">
+                                    <a href="#">
+                                        <button class="btn btn-primary" id="{{ room.room }}" onclick="newMessageForm('{{ room.room }}')">
+                                            <i class="fa fa-paper-plane"></i> Send Message</button>
+                                    </a>
+
+                                </td>
+                                <td width="10%">
+                                    <a href="/room4u/rooms/{{ room.room }}">
+                                        <button class="btn btn-primary" type="button">View Room</button>
+                                    </a>
+
+                                </td>
+                                <td width="10%">
+                                    <a data-toggle="collapse" href="#expand-{{ room.room }}">
+                                        <button class="btn btn-secondary" type="button">Expand</button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-body ">
+                        <div class="table-responsive panel-collapse collapse" id="expand-{{ room.room }}">
+                            <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                <tbody>
+                                {% for user in room.users %}
+                                    <tr>
+                                        <td>{{ user.user.username }}</td>
+                                        <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
+                                        <td>{{ user.start }}</td>
+                                        <td align="right">
+                                            <a href="#">
+                                                <button class="btn btn-primary" id="{{ user.user.username }}" onclick="newMessageForm2('{{ user.user.username }}')">
+                                                    <i class="fa fa-paper-plane"></i> Send Message</button>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% endif %}
+    {% else %}
+
+        <!-- Breadcrumbs-->
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="/room4u">room4u</a>
+            </li>
+            <li class="breadcrumb-item active">Check-in</li>
+        </ol>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-calendar-check-o"></i> Current Check-in
+            </div>
+            <div class="card-body">
+                {% if checked_in %}
+                    <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
+                        since {{ checked_in_time }}</div>
+                    <button class="btn btn-primary" type="button" onclick="check_out('{{ checked_in_room_id }}' , '{{ user_id }}')">Check-out</button>
+                    <a data-toggle="collapse" href="#usersInRoom">
+                        <button class="btn btn-secondary" type="button">Users in this Room</button>
+                    </a>
+
+                {% else %}
+                    <div style="padding-bottom: inherit">You are not currently checked in.</div>
+                {% endif %}
+                <a href="/room4u/check-in/history">
+                    <button class="btn btn-secondary" type="button">History</button>
+                </a>
+                {% if checked_in %}
+                    <div class="table-responsive panel-collapse collapse" id="usersInRoom" style="padding-top: 10px">
+                        <table class="table" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for user in users_in_room %}
+                                <tr>
+                                    <td>{{ user.user.username }}</td>
+                                    <td>{{ user.user.first_name }} {{ user.user.last_name }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-calendar-plus-o"></i> New Check-in
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_username">Search Room</label>
+                        <input class="form-control" id="id_username" type="text" name="keyword"
+                               placeholder="Enter room">
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit">Search Room</button>
+                </form>
+            </div>
+
+            {% if rooms %}
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                            <tbody>
+                            {% for room in rooms %}
+                                <tr>
+                                    <td width="80%">
+                                        <font color="DimGray">{{ room.hierarchy }}/</font>{{ room.name }}
+                                    </td>
+
+                                    <td width="10%">
+                                        <button class="btn btn-primary btn-block" type="submit"
+                                                onclick="check_in('{{ room.id }}', '{{ room.name }}', '{{ user_id }}')">Check-in
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+    {% endif %}
+{% endblock %}

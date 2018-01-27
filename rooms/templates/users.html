@@ -1,0 +1,51 @@
+ {% extends "blank.html" %}
+
+{% block body %}
+
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item active">Users</li>
+    </ol>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-search"></i> Find Users
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">Enter an username, first name or last name</label>
+                    <input class="form-control" id="id_username" type="text" name="keyword"
+                           placeholder="Example: istXXXXXX or João">
+                </div>
+                <button class="btn btn-primary btn-block" type="submit">Search User</button>
+            </form>
+        </div>
+
+        {% if users %}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td width="20%">{{ user }}</td>
+                                <td width="80%">{{ user.first_name }} {{ user.last_name }}</td>
+                                <td width="10%">
+                                    <button class="btn btn-secondary btn-block" type="submit"
+                                            onclick="window.location.href='/room4u/users/{{ user }}'" >
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

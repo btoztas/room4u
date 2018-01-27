@@ -1,0 +1,72 @@
+{% extends "blank.html" %}
+
+{% block body %}
+
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item active"><a href="/room4u/users">Users</a></li>
+        <li class="breadcrumb-item active">{{ user.username }}</li>
+    </ol>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-info"></i> User Info
+        </div>
+        <div class="card-body ">
+            <div align="center">
+                <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+                <div align="center">
+                    <img style="padding: 10px" src="https://fenix.tecnico.ulisboa.pt/user/photo/{{ user.username }}"
+                         width="15%"/>
+                </div>
+                <h5>{{ user.username }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-location-arrow"></i> Current Check-in
+        </div>
+        <div class="card-body ">
+            {% if checked_in %}
+                <div style="padding-bottom: inherit">Currently checked in on <a href="/room4u/rooms/{{ checked_in.room.id }}">
+                    {{ checked_in.room.hierarchy }}/{{ checked_in.room.name }}</a>,
+                    since {{ checked_in.start }}</div>
+            {% else %}
+                <div style="padding-bottom: inherit">Currently not checked in.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-history"></i> Occupancy History - {{ all_visits_total }} Visits
+        </div>
+        <div class="card-body ">
+            {% if all_visits_total >= 1 %}
+                <div class="table-responsive" id="{{ room.room }}">
+
+
+                    <table class="table" id="dataTable" width="100%" cellspacing="0">
+                        <tbody>
+                        {% for visit in all_visits %}
+                            <tr>
+                                <td>{{ visit.room.name}}</td>
+                                <td>{{ visit.start }}</td>
+                                <td>{{ visit.end }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            {% else %}
+                There are no visits
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

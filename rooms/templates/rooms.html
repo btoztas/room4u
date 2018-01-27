@@ -1,0 +1,52 @@
+ {% extends "blank.html" %}
+
+{% block body %}
+
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item active">Rooms</li>
+    </ol>
+
+    <div class="card mb-3">
+        <div class="card-header">
+            <i class="fa fa-search"></i> Find Rooms
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">Enter a room</label>
+                    <input class="form-control" id="id_username" type="text" name="keyword"
+                           placeholder="Example: GA4">
+                </div>
+                <button class="btn btn-primary btn-block" type="submit">Search Room</button>
+            </form>
+        </div>
+
+        {% if rooms %}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                        <tbody>
+                        {% for room in rooms %}
+                            <tr>
+                                <td width="80%">
+                                    <font color="DimGray">{{ room.hierarchy }}/</font>{{ room.name }}
+                                </td>
+                                <td width="10%">
+                                    <button class="btn btn-secondary btn-block" type="submit"
+                                            onclick="window.location.href='/room4u/rooms/{{ room.id }}'" >
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

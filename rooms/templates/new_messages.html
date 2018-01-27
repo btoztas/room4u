@@ -1,0 +1,69 @@
+{% extends "blank.html" %}
+<head>
+<style>
+input[type=text], select, textarea {
+    width: 100%; /* Full width */
+    padding: 12px; /* Some padding */
+    border: 1px solid #ccc; /* Gray border */
+    border-radius: 4px; /* Rounded borders */
+    box-sizing: border-box; /* Make sure that padding and width stays in place */
+    margin-top: 6px; /* Add a top margin */
+    margin-bottom: 16px; /* Bottom margin */
+    resize: vertical /* Allow the user to vertically resize the textarea (not horizontally) */
+}
+
+/* Style the submit button with a specific background color etc */
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* When moving the mouse over the submit button, add a darker green color */
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+/* Add a background color and some padding around the form */
+.container {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+</style>
+</head>
+{% block body %}
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a href="/room4u">room4u</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="/room4u/messages">Messages</a>
+        </li>
+        <li class="breadcrumb-item active">New Message</li>
+    </ol>
+ <div class="container">
+  <form id = "newmessage" action="/room4u/messages/handler" method="post">
+    {% csrf_token %}
+
+    <label for="rname">Room</label><br>
+    <input type="text" id="rname" name="rname" placeholder="Room name..."><br>
+
+    <label for="subject">Subject</label><br>
+    <div class = "card-body">
+        <input type="text" id="subject" name="subject" placeholder="Message subject..."><br>
+    </div>
+
+    <label for="message">Message</label><br>
+    <div class = "card-body">
+        <textarea id="message" name="message" placeholder="Write your Message..." style="height:200px"></textarea>
+    </div>
+    <br>
+    <input type="submit" value="Send">
+
+  </form>
+</div>
+{% endblock body %}

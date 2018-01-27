@@ -1,0 +1,198 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>room4u - Dashboard</title>
+    <!-- Bootstrap core CSS-->
+    <link href="{% static 'bootstrap/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Custom fonts for this template-->
+    <link href="{% static 'bootstrap/vendor/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet" type="text/css">
+    <!-- Custom styles for this template-->
+    <link href="{% static 'bootstrap/css/sb-admin.css' %}" rel="stylesheet">
+</head>
+
+<body class="fixed-nav sticky-footer bg-dark" id="page-top">
+<!-- Navigation-->
+<input type="hidden" id="receiver" name ="receiver" value="{{ request.user.id }}">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top" id="mainNav">
+    <a class="navbar-brand" href="/room4u">room4u</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+            aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav navbar-sidenav" id="exampleAccordion">
+            {% if is_admin %}
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents"
+                       data-parent="#exampleAccordion">
+                        <i class="fa fa-fw fa-calendar"></i>
+                        <span class="nav-link-text">Manage Check-ins</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="collapseComponents">
+                        <li>
+                            <a href="/room4u/check-in/">Current Check-ins</a>
+                        </li>
+                        <li>
+                            <a href="/room4u/check-in/history">Check-in History</a>
+                        </li>
+                    </ul>
+                </li>
+            {% else %}
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Check-ins">
+                    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#collapseComponents"
+                       data-parent="#exampleAccordion">
+                        <i class="fa fa-fw fa-calendar"></i>
+                        <span class="nav-link-text">Check-ins</span>
+                    </a>
+                    <ul class="sidenav-second-level collapse" id="collapseComponents">
+                        <li>
+                            <a href="/room4u/check-in/">New Check-in</a>
+                        </li>
+                        <li>
+                            <a href="/room4u/check-in/history">Check-in History</a>
+                        </li>
+                    </ul>
+                </li>
+            {% endif %}
+            <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Messages">
+                <a class="nav-link" href="/room4u/messages">
+                    <i class="fa fa-fw fa-envelope"></i>
+                    <span class="nav-link-text">Messages</span>
+                </a>
+            </li>
+            {% if is_admin %}
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Rooms">
+                    <a class="nav-link" href="/room4u/rooms">
+                        <i class="fa fa-fw fa-map-marker"></i>
+                        <span class="nav-link-text">Manage Rooms</span>
+                    </a>
+                </li>
+                <li class="nav-item" data-toggle="tooltip" data-placement="right" title="Manage Users">
+                    <a class="nav-link" href="/room4u/users">
+                        <i class="fa fa-fw fa-users"></i>
+                        <span class="nav-link-text">Manage Users</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        <ul class="navbar-nav sidenav-toggler">
+            <li class="nav-item">
+                <a class="nav-link text-center" id="sidenavToggler">
+                    <i class="fa fa-fw fa-angle-left"></i>
+                </a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+                <span class="nav-link">
+                    <i class="fa fa-fw fa-user"></i>{{ username }}</span>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/room4u/logout/">
+                    <i class="fa fa-fw fa-sign-out"></i>Logout</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="content-wrapper">
+    <div class="container-fluid">
+        {% block body %}
+        {% endblock %}
+    </div>
+    <!-- Alert Modal-->
+    <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel">Check-in</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body"><span id="alertModalText"></span></div>
+                <div class="modal-footer">
+                    <button id="but" onClick="window.location.reload()" class="btn btn-primary" type="button"
+                            data-dismiss="modal">Ok
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Message Modal-->
+    <div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="checkInModal"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">New Message</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="newmessage" action="/room4u/messages/handler" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" id="destination" name ="destination" value="o">
+                    <input type="hidden" id="destflag" name ="destflag" value="o">
+                    <input type="hidden" id="sender" name ="sender" value="{{ request.user.id }}">
+                    <div class = "card-body">
+                    <label for="subject">Subject</label><br>
+                    <!--<div class = "card-body">-->
+                    <input class = "form-control" type="text" id="subject" name="subject" placeholder="Message subject..."><br>
+                    <!--</div>-->
+                    <label for="message">Message</label><br>
+                    <!--<div class = "card-body">-->
+                    <textarea class = "form-control" id="message" name="message" placeholder="Write your Message..." style="height:200px"></textarea>
+                    </div>
+                    <br>
+                    <div class="modal-footer">
+                        <!--<input type="submit" value="Send">-->
+                        <button class="btn btn-primary" type="submit">Send
+                    </button>
+                    </div>
+
+                </form>
+                <!--<div class="modal-footer">
+                    <button id = "but1" onClick="window.location.reload()" class="btn btn-primary" type="button"
+                            data-dismiss="modal">Send
+                    </button>
+                </div>-->
+            </div>
+        </div>
+    </div>
+    <!-- /.container-fluid-->
+    <!-- /.content-wrapper-->
+    <footer class="sticky-footer">
+        <div class="container">
+            <div class="text-center">
+                <small>Copyright © room4u 2017</small>
+            </div>
+        </div>
+    </footer>
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fa fa-angle-up"></i>
+    </a>
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'bootstrap/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'bootstrap/vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'bootstrap/js/sb-admin.min.js' %}"></script>
+    <script src="{% static 'js/functions.js' %}"></script>
+    {% block scripts %}
+    {% endblock %}
+</div>
+</body>
+
+</html>
