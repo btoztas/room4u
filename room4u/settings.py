@@ -24,10 +24,7 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
-    '127.0.0.1',
-]
+
 
 # Application definition
 
@@ -153,9 +150,14 @@ AUTHENTICATION_BACKENDS = [
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
 if 'ON_AWS' in os.environ:
-    SITE_URL = 'http://room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+    SITE_URL = 'http://room4u.s5pqrzymxs.us-west-2.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 
 LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
+
+ALLOWED_HOSTS = [
+    'room4u.s5pqrzymxs.us-west-2.elasticbeanstalk.com',
+    '127.0.0.1',
+]
