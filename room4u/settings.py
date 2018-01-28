@@ -138,7 +138,7 @@ AUTHENTICATION_BACKENDS = [
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
 if 'ON_AWS' in os.environ:
-    SITE_URL = 'http://room4u.q3mfyhwmay.eu-west-1.elasticbeanstalk.com'
+    SITE_URL = 'http://room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 
@@ -146,7 +146,7 @@ LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
 
 ALLOWED_HOSTS = [
-    'room4u.q3mfyhwmay.eu-west-1.elasticbeanstalk.com',
+    'room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com ',
     '127.0.0.1',
 ]
 
@@ -154,7 +154,7 @@ if 'ON_AWS' in os.environ:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': 'room4u-cache.lwrih4.0001.euw1.cache.amazonaws.com:11211',
+            'LOCATION': 'room4u.skjooc.0001.euw2.cache.amazonaws.com:11211',
         }
     }
 else:
