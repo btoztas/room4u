@@ -544,7 +544,7 @@ function isArrayLike( obj ) {
 }
 var Sizzle =
 /*!
- * Sizzle CSS Selector Engine v2.2.1
+ * Sizzle css Selector Engine v2.2.1
  * http://sizzlejs.com/
  *
  * Copyright jQuery Foundation and other contributors
@@ -629,7 +629,7 @@ var i,
 	attributes = "\\[" + whitespace + "*(" + identifier + ")(?:" + whitespace +
 		// Operator (capture 2)
 		"*([*^$|!~]?=)" + whitespace +
-		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
+		// "Attribute values must be css identifiers [capture 5] or strings [capture 3 or capture 4]"
 		"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
 		"*\\]",
 
@@ -682,7 +682,7 @@ var i,
 	rsibling = /[+~]/,
 	rescape = /'|\\/g,
 
-	// CSS escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
+	// css escapes http://www.w3.org/TR/CSS21/syndata.html#escaped-characters
 	runescape = new RegExp( "\\\\([\\da-f]{1,6}" + whitespace + "?|(" + whitespace + ")|.)", "ig" ),
 	funescape = function( _, escaped, escapedWhitespace ) {
 		var high = "0x" + escaped - 0x10000;
@@ -5769,7 +5769,7 @@ var documentElement = document.documentElement;
 			var ret,
 				marginDiv = div.appendChild( document.createElement( "div" ) );
 
-			// Reset CSS: box-sizing; display; margin; border; padding
+			// Reset css: box-sizing; display; margin; border; padding
 			marginDiv.style.cssText = div.style.cssText =
 
 				// Support: Android 2.3
@@ -6147,7 +6147,7 @@ jQuery.extend( {
 				return;
 			}
 
-			// If a number was passed in, add the unit (except for certain CSS properties)
+			// If a number was passed in, add the unit (except for certain css properties)
 			if ( type === "number" ) {
 				value += ret && ret[ 3 ] || ( jQuery.cssNumber[ origName ] ? "" : "px" );
 			}

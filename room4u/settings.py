@@ -46,9 +46,9 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.cache.UpdateCacheMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+#    'django.middleware.cache.UpdateCacheMiddleware',
+#    'django.middleware.common.CommonMiddleware',
+#    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'room4u.urls'
@@ -89,8 +89,14 @@ if 'RDS_DB_NAME' in os.environ:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#            'ENGINE': 'django.db.backends.sqlite3',
+#            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ist179069',
+            'USER': 'ist179069',
+            'PASSWORD': 'qpaq9059',
+            'HOST': 'db.tecnico.ulisboa.pt',
+            'PORT': '3306',
         }
     }
 
@@ -98,14 +104,14 @@ if 'ON_AWS' in os.environ:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': '127.0.0.1:11211',
+            'LOCATION': 'room4u-cache.lwrih4.0001.euw1.cache.amazonaws.com:11211',
         }
     }
 else:
     CACHES = {
         'default': {
             'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-            'LOCATION': 'room4u-cache.lwrih4.0001.euw1.cache.amazonaws.com:11211',
+            'LOCATION': '127.0.0.1:11211',
         }
     }
 
@@ -140,7 +146,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files (css, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'

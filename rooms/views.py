@@ -2,9 +2,11 @@ import json
 import os
 import string
 
+import requests
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -12,13 +14,15 @@ from django.views.generic import View
 from django.conf import settings
 import fenixedu
 from room4u.settings import SITE_URL
+from rooms.management.commands import getrooms
 from .forms import MessageForm, FilterForm, SearchRoomForm, AdminSearchForm
 from .models import Message, Room, Visit, NewMessage
 from django.utils import timezone
 from django.core.serializers import serialize
 from django.contrib.auth.models import User
 import json
-#import datetime
+
+# import datetime
 
 if 'ON_AWS' in os.environ:
 
@@ -211,28 +215,32 @@ class MessageView(View):
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
-                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate],
+                                                              receiver=request.user)
                     if str(date) == "6month":
                         startdate = timezone.now()
                         enddate = timezone.now() - timezone.timedelta(days=180)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
-                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate],
+                                                              receiver=request.user)
                     if str(date) == "month":
                         startdate = timezone.now()
                         enddate = timezone.now() - timezone.timedelta(days=30)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
-                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate],
+                                                              receiver=request.user)
                     if str(date) == "week":
                         startdate = timezone.now()
                         enddate = timezone.now() - timezone.timedelta(days=7)
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
-                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate],
+                                                              receiver=request.user)
                     if str(date) == "today":
                         startdate = timezone.now()
                         enddate = timezone.now() - timezone.timedelta(hours=13)
@@ -240,7 +248,8 @@ class MessageView(View):
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__range=[enddate, startdate])
                         else:
-                            messages = Message.objects.filter(created_at__range=[enddate, startdate], receiver=request.user)
+                            messages = Message.objects.filter(created_at__range=[enddate, startdate],
+                                                              receiver=request.user)
                     if str(date) == "specific_date":
                         if request.user.is_staff:
                             messages = Message.objects.filter(created_at__year=datee[0], created_at__month=datee[1],
@@ -266,6 +275,7 @@ class ApiView(View):
     def get(self, request, *args, **kwargs):
         return HttpResponse("done")
 
+
 class RoomsApiView(View):
     def get(self, request, **kwargs):
         if 'room_id' in kwargs:
@@ -280,9 +290,9 @@ class RoomsApiView(View):
             else:
                 if 'search' in kwargs:
                     if kwargs['search'] == "visits":
-                            visits = Visit.objects.filter(room=kwargs['room_id'])
-                            response = serialize("json", visits)
-                            return HttpResponse(response, content_type='application/json')
+                        visits = Visit.objects.filter(room=kwargs['room_id'])
+                        response = serialize("json", visits)
+                        return HttpResponse(response, content_type='application/json')
                     elif kwargs['search'] == "messages":
                         messages = Message.objects.filter(room=kwargs['room_id'])
                         response = serialize("json", messages)
@@ -305,8 +315,8 @@ class RoomsApiView(View):
                 response = serialize("json", rooms)
                 return HttpResponse(response, content_type='application/json')
 
-class MessagesApiView(View):
 
+class MessagesApiView(View):
     def get(self, request, **kwargs):
         if 'message_id' in kwargs:
             if not Message.objects.filter(id=kwargs['message_id']):
@@ -326,10 +336,11 @@ class MessagesApiView(View):
                 messages = Message.objects.all()
                 response = serialize("json", messages)
                 return HttpResponse(response, content_type='application/json')
+
     def post(self, request):
         body = json.loads(request.body)
         if 'subject' in body and 'message' in body and 'sender_id' in body:
-            if body['subject']=="" or body['message']=="":
+            if body['subject'] == "" or body['message'] == "":
                 response = dict()
                 response['error'] = 'bad request, subject or body empty'
                 return HttpResponse(
@@ -405,7 +416,8 @@ class MessagesApiView(View):
                                 )
                             else:
                                 instance = Message(title=str(body['subject']),
-                                                   text=str(body['message']), sender=User.objects.filter(id=body['sender_id']).first(),
+                                                   text=str(body['message']),
+                                                   sender=User.objects.filter(id=body['sender_id']).first(),
                                                    receiver=users.user, room=users.room)
                                 instance.save()
                                 instance2 = NewMessage(message=instance)
@@ -564,6 +576,56 @@ class NewCheckInView(View):
         visit = Visit(user=user, room=room, start=start)
         visit.save()
         return HttpResponse(status=200)
+
+
+@method_decorator(login_required(login_url='/room4u/'), name='dispatch')
+class RoomsReloadView(View):
+    base_url = 'https://fenix.tecnico.ulisboa.pt/api/fenix/v1/spaces/'
+
+    def retrieve_space(self, space_parent, space_to_explore, hierarchy):
+
+        # Request space's info
+        r = requests.get(self.base_url + space_to_explore)
+        space_info = r.json()
+
+        # Create new space object with the info retrieved
+        if space_parent == 0:
+            new_space = Room(id=space_info['id'], name=space_info['name'], hierarchy=hierarchy)
+        else:
+            new_space = Room(id=space_info['id'], parent_id=space_parent,
+                             name=space_info['name'], hierarchy=hierarchy)
+        new_space.save()
+
+        hierarchy = hierarchy + '/' + space_info['name']
+
+        # Explore other contained spaces within this space
+        for contained_space in space_info['containedSpaces']:
+            self.retrieve_space(space_to_explore=contained_space['id'], space_parent=new_space, hierarchy=hierarchy)
+
+    def handle(self, *args, **options):
+
+        if not Room.objects.all().exists():
+
+            # Request space's info - this will be the campuses (roots of the tree)
+            r = requests.get(self.base_url)
+            campuses = r.json()
+
+            # Explore spaces contained within the campus
+            for campus_index in range(0, len(campuses)):
+                campus_id = campuses[campus_index]['id']
+                print campuses[campus_index]['name']
+                hierarchy = ''
+                self.retrieve_space(space_to_explore=campus_id, space_parent=0, hierarchy=hierarchy)
+
+    def get(self, request, *args, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("SET FOREIGN_KEY_CHECKS=0")
+            cursor.execute("TRUNCATE rooms_room")
+            cursor.execute("SET FOREIGN_KEY_CHECKS=1")
+
+        self.handle()
+        return HttpResponse(status=200)
+
 
 
 @method_decorator(login_required(login_url='/room4u/'), name='dispatch')
@@ -733,7 +795,7 @@ class RoomView(View):
         context = self.get_context(request)
 
         room_id = kwargs['room_id']
-
+        context['room_info'] = client.get_space(id=room_id)
         context['room'] = Room.objects.filter(id=room_id).first()
 
         # Getting room family
@@ -818,8 +880,8 @@ class UserView(View):
 
         return render(request, self.template, context)
 
-class VisitApiView(View):
 
+class VisitApiView(View):
     def get(self, request, *args, **kwargs):
 
         if 'visit_id' in kwargs:
@@ -983,7 +1045,6 @@ class VisitApiView(View):
 
 
 class NewMessageApiView(View):
-
     def get(self, request, *args, **kwargs):
 
         if 'new_message_id' in kwargs:
@@ -1046,7 +1107,6 @@ class NewMessageApiView(View):
 
 
 class UserApiView(View):
-
     def get(self, request, *args, **kwargs):
 
         if 'user_id' in kwargs:
@@ -1103,7 +1163,7 @@ class UserApiView(View):
 
     def delete(self, request, *args, **kwargs):
         if 'user_id' in kwargs and 'resource' in kwargs:
-            if kwargs['resource']=='new_messages':
+            if kwargs['resource'] == 'new_messages':
                 if not NewMessage.objects.filter(message__receiver=kwargs['user_id']):
                     return HttpResponse(
                         json.dumps([]),
