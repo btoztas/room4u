@@ -146,7 +146,7 @@ LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
 
 ALLOWED_HOSTS = [
-    'room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com ',
+    'room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com',
     '127.0.0.1',
 ]
 
