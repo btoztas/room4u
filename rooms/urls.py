@@ -1,5 +1,6 @@
 from django.conf.urls import url
 from django.contrib.auth import views as auth_views
+from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 
 from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView, \
@@ -22,10 +23,10 @@ urlpatterns = [
     url(r'^check-out', csrf_exempt(CheckOutView.as_view())),
     url(r'^rooms/$', RoomsView.as_view()),
     url(r'^rooms/reload$', RoomsReloadView.as_view()),
-    url(r'^rooms/(?P<room_id>\d+)/$', RoomView.as_view()),
+    url(r'^rooms/(?P<room_id>\d+)/$', cache_page(10)(RoomView.as_view())),
     url(r'^users/$', UsersView.as_view()),
-    url(r'^users/(?P<username>.*)/$', UserView.as_view()),
-    url(r'^admin-panel/$', auth_views.login, {'template_name': 'admin_login.html'}, name='admin_login'),
+    url(r'^users/(?P<username>.*)/$', cache_page(15*60)(UserView.as_view())),
+    url(r'^admin-panel/$', cache_page(15*60)(auth_views.login), {'template_name': 'admin_login.html'}, name='admin_login'),
     url(r'^logout/$', auth_views.logout, {'next_page': '/room4u'}, name='logout'),
 
     # API urls

@@ -10,6 +10,7 @@ from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from django.views.generic import View
 from django.conf import settings
 import fenixedu
