@@ -23,7 +23,7 @@
                         <td colspan="2" align="center">
                             {% for parent in room_family %}
                                 <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
-                                <a href="http://127.0.0.1:8000/room4u/rooms/{{ parent.id }}">{{ parent.name }}</a>
+                                <a href="/room4u/rooms/{{ parent.id }}">{{ parent.name }}</a>
                             {% endfor %}
                             <i class="fa fa-long-arrow-right" aria-hidden="true"></i>
                             {{ room.name }}
