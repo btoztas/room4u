@@ -61,17 +61,36 @@ function check_out(room, user) {
 
 }
 
+function reload_db() {
 
-$("#newmessage").submit(function(event) {
+    var http = new XMLHttpRequest();
+    var url = "/room4u/rooms/reload";
+
+    http.open("GET", url, true);
+
+    http.timeout = 500;
+
+    replace('alertModalLabel', "Reload DB");
+
+    replace('alertModalText', "Reloading started. This might take a while. Changes will be seen soon");
+
+    $('#alertModal').modal('show');
+
+
+    http.send(null);
+}
+
+
+$("#newmessage").submit(function (event) {
 
 
     /* stop form from submitting normally */
     //$('#alertModal').modal('show');
     event.preventDefault();
-    if($('#subject').val()=='' || $('#message').val()==''){
+    if ($('#subject').val() == '' || $('#message').val() == '') {
         replace('messageModalLabel', "Message must have subject and body");
         $('#messageModal').modal('show');
-    }else {
+    } else {
         /* get the action attribute from the <form action=""> element */
         var $form = $(this);//, url = $form.attr( 'action' );
         var url = "/room4u/api/messages/";
@@ -144,10 +163,10 @@ function income() {
     var base_url = '/room4u/api/users/';
     var url = base_url.concat($('#receiver').val(), "/new_messages")
     $.ajax({
-        url:url,
-        type:"DELETE",
-        success:function(data){  // success is the callback when the server
-            if (data.toString() != ''){
+        url: url,
+        type: "DELETE",
+        success: function (data) {  // success is the callback when the server
+            if (data.toString() != '') {
                 replace('alertModalLabel', data[0].fields.title);
                 replace('but', "Ok");
                 replace('alertModalText', data[0].fields.text);
@@ -158,6 +177,6 @@ function income() {
 }
 
 income(); // This will run on page load
-setInterval(function(){
+setInterval(function () {
     income() // this will run after every 5 seconds
 }, 5000);

@@ -4,13 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 
 from rooms.views import IndexView, AuthView, CheckInView, MessageView, NewMessageView, NewMessageHandlerView, ApiView, \
     CheckInHistoryView, NewCheckInView, CheckOutView, IncomingMessageView, RoomsView, RoomView, UsersView, UserView, \
-    VisitApiView, NewMessageApiView, UserApiView, RoomsApiView, MessagesApiView
+    VisitApiView, NewMessageApiView, UserApiView, RoomsApiView, MessagesApiView, RoomsReloadView
 
 urlpatterns = [
 
     # Web application urls
     url(r'^$', csrf_exempt(IndexView.as_view())),
-    url(r'^auth$', AuthView.as_view()),
+    url(r'^auth/$', AuthView.as_view()),
     url(r'^logout/$', auth_views.logout, {'next_page': '/room4u'}, name='logout'),
     url(r'^messages/new$', NewMessageView.as_view()),
     url(r'^messages/incoming$', csrf_exempt(IncomingMessageView.as_view())),
@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^check-in/history$', CheckInHistoryView.as_view()),
     url(r'^check-out', csrf_exempt(CheckOutView.as_view())),
     url(r'^rooms/$', RoomsView.as_view()),
+    url(r'^rooms/reload$', RoomsReloadView.as_view()),
     url(r'^rooms/(?P<room_id>\d+)/$', RoomView.as_view()),
     url(r'^users/$', UsersView.as_view()),
     url(r'^users/(?P<username>.*)/$', UserView.as_view()),
