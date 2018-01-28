@@ -19,7 +19,3 @@ tests/report/
 .idea
 db.sqlite3
 mysql.cnf
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
