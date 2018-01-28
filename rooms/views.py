@@ -549,7 +549,7 @@ class CheckInView(View):
                 keyword = request.POST['keyword']
 
                 # Search for rooms in the db
-                context['rooms'] = Room.objects.filter(name__contains=keyword)
+                context['rooms'] = Room.objects.filter(name__icontains=keyword)
 
         return render(request, self.template, context)
 
