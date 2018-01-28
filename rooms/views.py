@@ -1064,15 +1064,14 @@ class NewMessageApiView(View):
                 )
 
             return HttpResponse(
-                serialize("json", [new_message]),
+                serialize("json", [new_message.message]),
                 content_type='application/json',
                 status=200
             )
         else:
-            new_messages = NewMessage.objects.all()
-
+            messages = Message.objects.raw('select * from rooms_newmessage natural join rooms_message')
             return HttpResponse(
-                serialize("json", new_messages),
+                serialize("json", messages),
                 content_type='application/json',
                 status=200
             )
