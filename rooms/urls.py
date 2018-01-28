@@ -10,7 +10,7 @@ urlpatterns = [
 
     # Web application urls
     url(r'^$', csrf_exempt(IndexView.as_view())),
-    url(r'^auth/$', AuthView.as_view()),
+    url(r'^auth$', AuthView.as_view()),
     url(r'^logout/$', auth_views.logout, {'next_page': '/room4u'}, name='logout'),
     url(r'^messages/new$', NewMessageView.as_view()),
     url(r'^messages/incoming$', csrf_exempt(IncomingMessageView.as_view())),

@@ -24,10 +24,7 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
-    '127.0.0.1',
-]
+
 
 # Application definition
 
@@ -49,6 +46,9 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.cache.UpdateCacheMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.cache.FetchFromCacheMiddleware',
 ]
 
 ROOT_URLCONF = 'room4u.urls'
@@ -94,6 +94,21 @@ else:
         }
     }
 
+if 'ON_AWS' in os.environ:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'room4u-cache.lwrih4.0001.euw1.cache.amazonaws.com:11211',
+        }
+    }
+
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
@@ -134,10 +149,15 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
-if 'RDS_DB_NAME' in os.environ:
-    SITE_URL = 'http://room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+if 'ON_AWS' in os.environ:
+    SITE_URL = 'http://room4u.s5pqrzymxs.us-west-2.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 
 LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
+
+ALLOWED_HOSTS = [
+    'room4u.s5pqrzymxs.us-west-2.elasticbeanstalk.com',
+    '127.0.0.1',
+]
