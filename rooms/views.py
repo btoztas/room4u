@@ -137,6 +137,7 @@ class NewMessageHandlerView(View):
                     nusers = len(users)
                     message = request.POST.get("message", "")
                     for user in users:
+                        print "ola"
                         instance = Message(title=str(request.POST.get("subject", "")),
                                            text=str(request.POST.get("message", "")), sender=request.user,
                                            receiver=user.user, room=user.room)
@@ -372,7 +373,9 @@ class MessagesApiView(View):
                                 )
                             else:
                                 users = Visit.objects.filter(room=destination, end__isnull=True)
+                                print users
                                 for user in users:
+                                    print "ola"
                                     instance = Message(title=str(body['subject']),
                                                        text=str(body['message']),
                                                        sender=User.objects.filter(id=body['sender_id']).first(),
@@ -380,12 +383,12 @@ class MessagesApiView(View):
                                     instance.save()
                                     instance2 = NewMessage(message=instance)
                                     instance2.save()
-                                    response = serialize("json", [Message(title=str(body['subject']),
-                                                                          text=str(body['message']),
-                                                                          sender=User.objects.filter(
-                                                                              id=body['sender_id']).first(),
-                                                                          receiver=user.user, room=user.room)])
-                                    return HttpResponse(response, content_type='application/json')
+                                response = serialize("json", [Message(title=str(body['subject']),
+                                                                      text=str(body['message']),
+                                                                      sender=User.objects.filter(
+                                                                          id=body['sender_id']).first(),
+                                                                      receiver=user.user, room=user.room)])
+                                return HttpResponse(response, content_type='application/json')
                         else:
                             response = dict()
                             response['error'] = 'sender not found'
