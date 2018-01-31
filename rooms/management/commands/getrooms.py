@@ -38,5 +38,6 @@ class Command(BaseCommand):
             # Explore spaces contained within the campus
             for campus_index in range(0, len(campuses)):
                 campus_id = campuses[campus_index]['id']
+                print campuses[campus_index]['name']
                 hierarchy = ''
                 self.retrieve_space(space_to_explore=campus_id, space_parent=0, hierarchy=hierarchy)

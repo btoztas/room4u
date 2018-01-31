@@ -24,10 +24,7 @@ SECRET_KEY = 'evi1bcsa#vw&^4wbl8glorpk7ll6h6mf4+p!ytd4)ymf+o*y$7'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com',
-    '127.0.0.1',
-]
+
 
 # Application definition
 
@@ -89,8 +86,14 @@ if 'RDS_DB_NAME' in os.environ:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#            'ENGINE': 'django.db.backends.sqlite3',
+#            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': 'ist179069',
+            'USER': 'ist179069',
+            'PASSWORD': 'qpaq9059',
+            'HOST': 'db.tecnico.ulisboa.pt',
+            'PORT': '3306',
         }
     }
 
@@ -125,7 +128,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files (css, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = '/static/'
@@ -134,10 +137,31 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'fenixedu.authentication.backend.FenixEduAuthenticationBackend',
 ]
-if 'RDS_DB_NAME' in os.environ:
-    SITE_URL = 'http://room4u.xrjug35ebn.eu-west-1.elasticbeanstalk.com'
+if 'ON_AWS' in os.environ:
+    SITE_URL = 'http://room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com'
 else:
     SITE_URL = 'http://127.0.0.1:8000'
 
 LOGIN_REDIRECT_URL = '/room4u'
 LOGIN_URL = '/room4u'
+
+ALLOWED_HOSTS = [
+    'room4u.mwrnhf4dxm.eu-west-2.elasticbeanstalk.com',
+    '127.0.0.1',
+]
+
+if 'ON_AWS' in os.environ:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': 'room4u.skjooc.0001.euw2.cache.amazonaws.com:11211',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+            'LOCATION': '127.0.0.1:11211',
+        }
+    }
+

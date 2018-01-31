@@ -178,7 +178,7 @@
                 {% if checked_in %}
                     <div style="padding-bottom: inherit">You are currently checked in on {{ checked_in_room }},
                         since {{ checked_in_time }}</div>
-                    <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
+                    <button class="btn btn-primary" type="button" onclick="check_out('{{ checked_in_room_id }}' , '{{ user_id }}')">Check-out</button>
 
 
                 {% else %}

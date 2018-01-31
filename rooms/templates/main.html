@@ -1,5 +1,6 @@
 {% extends "blank.html" %}
 
+
 {% block body %}
 
     <ol class="breadcrumb">
@@ -25,7 +26,7 @@
                     <button class="btn btn-primary" type="button">New Check-in</button>
                 </a>
                 {% if checked_in %}
-                    <button class="btn btn-primary" type="button" onclick="check_out()">Check-out</button>
+                    <button class="btn btn-primary" type="button" onclick="check_out('{{ checked_in_room_id }}' , '{{ user_id }}')">Check-out</button>
                     <a data-toggle="collapse" href="#usersInRoom">
                         <button class="btn btn-secondary" type="button">Users in this Room</button>
                     </a>
@@ -50,6 +51,20 @@
                 {% endif %}
             </div>
         </div>
+    {% else %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="fa fa-calendar-check-o"></i> Welcome to room4u
+            </div>
+            <div class="card-body">
+                This is your admin dashboard.
 
+                You can see <a href="/room4u/check-in">who is checked-in</a> and send messages, check the <a href="/room4u/check-in/history">check-in history</a>, <a href="/room4u/rooms/">search rooms</a> and <a href="/room4u/users/">search users</a>.
+
+                Have fun!
+
+                <p  align="center"> <button class="btn btn-primary"  type="button" onclick="reload_db()">Refresh Rooms Database</button></p>
+            </div>
+        </div>
     {% endif %}
 {% endblock %}
